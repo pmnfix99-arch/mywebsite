@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+
+<meta charset="UTF-8">
+
+<title>ระบบบันทึกข้อมูล</title>
+
+<style>
+
+body{
+
+font-family:Arial;
+
+max-width:500px;
+
+margin:50px auto;
+
+}
+
+input{
+
+width:100%;
+
+padding:10px;
+
+margin:10px 0;
+
+}
+
+button{
+
+padding:10px 20px;
+
+cursor:pointer;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>ระบบบันทึกข้อมูล</h2>
+
+<label>ชื่อ</label>
+
+<input id="name">
+
+<label>อายุ</label>
+
+<input id="age">
+
+<button onclick="save()">บันทึก</button>
+
+<script>
+
+function save(){
+
+const data={
+
+name:document.getElementById("name").value,
+
+age:document.getElementById("age").value
+
+};
+
+fetch("ใส่ URL Apps Script ตรงนี้",{
+
+method:"POST",
+
+body:JSON.stringify(data)
+
+})
+
+.then(r=>r.json())
+
+.then(r=>{
+
+alert("บันทึกสำเร็จ");
+
+});
+
+}
+
+</script>
+
+</body>
+
+</html>
