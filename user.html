@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ข้อมูลส่วนตัว - Team Connect Passport</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    padding: 14px 14px 20px;
+    background: linear-gradient(135deg, #ffffff 0%, #f1f7ec 55%, #e3efd8 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Thai", Tahoma, sans-serif;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  button { font-family: inherit; }
+  .wrap { width: 100%; max-width: 380px; }
+
+  /* ---------- Top bar ---------- */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 0.6rem;
+  }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: 50%; border: none; background: transparent;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    color: #5fae35; padding: 0; flex: none;
+  }
+  .icon-btn:active { transform: scale(0.92); }
+  .brand-center { text-align: center; flex: 1; }
+  .brand-center img { height: 40px; width: auto; display: block; margin: 0 auto; }
+  .brand-center .tagline { font-size: 7.5px; color: #8a97ac; letter-spacing: 0.2px; margin-top: 2px; }
+
+  .logout-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px; border: none; background: transparent; cursor: pointer; color: #5fae35;
+    padding: 2px 2px; flex: none;
+  }
+  .logout-btn:active { transform: scale(0.92); }
+  .logout-btn .logout-label { font-size: 8.5px; font-weight: 700; color: #5fae35; white-space: nowrap; }
+
+  /* ---------- Stepper ---------- */
+  .stepper-outer {
+    margin: 0 -14px 0.9rem; padding: 0 10px;
+    overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .stepper-outer::-webkit-scrollbar { display: none; }
+  .stepper {
+    display: flex; align-items: flex-start; width: max-content; padding: 4px 4px 2px;
+  }
+  .step-item {
+    display: flex; flex-direction: column; align-items: flex-start; width: 58px; flex: none;
+    background: none; border: none; padding: 0; cursor: pointer; color: inherit;
+  }
+  .step-row { display: flex; align-items: center; width: 100%; }
+  .step-circle {
+    width: 26px; height: 26px; min-width: 26px; border-radius: 50%;
+    border: 1.5px solid #c7cedc; background: #ffffff; color: #8a97ac;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; transition: all 0.15s ease; flex: none;
+  }
+  .step-line { flex: 1; height: 1.5px; background: #d4dbe6; transition: background 0.15s ease; }
+  .step-label {
+    display: flex; flex-direction: column; align-items: center; margin-top: 4px;
+    width: 26px; font-size: 8.5px; line-height: 1.25; color: #9aa7ba; text-align: center; white-space: nowrap;
+  }
+  .step-item.active .step-circle {
+    background: #3f7a1f; border-color: #3f7a1f; color: #ffffff;
+    box-shadow: 0 3px 8px rgba(63,122,31,0.35);
+  }
+  .step-item.active .step-label { color: #3f7a1f; font-weight: 700; }
+  .step-item.done .step-circle { background: #5fae35; border-color: #5fae35; color: #ffffff; }
+  .step-item.done .step-line, .step-item.done + .step-item .step-line { background: #5fae35; }
+  .step-item.done .step-label { color: #5fae35; }
+
+  /* ---------- Section title ---------- */
+  .row-line { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 0.35rem; }
+  .line { height: 0.5px; background: #b9c7dd; }
+  .row-line .line { flex: 1; }
+  .star { font-size: 10px; color: #5fae35; }
+  h1 {
+    font-size: 18px; font-weight: 700; text-align: center; margin: 0; color: #16233d;
+  }
+  .sub-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 8px; margin-bottom: 0.8rem; }
+  .sub-row .line { width: 60px; }
+  .sub-row .star { font-size: 8px; }
+
+  /* ---------- Card ---------- */
+  .card {
+    position: relative;
+    background: #fdfdfe;
+    border-radius: 22px;
+    border: 1px solid #eceff4;
+    padding: 1.2rem 1.1rem 1rem;
+    box-shadow: 0 12px 32px rgba(30,60,110,0.10), 0 2px 8px rgba(30,60,110,0.06);
+  }
+
+  .photo-wrap { display: flex; justify-content: center; margin-bottom: 0.25rem; }
+  .photo-box {
+    width: 108px; height: 108px; border-radius: 50%;
+    border: 1.5px dashed #a9c0e0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 4px; cursor: pointer;
+    background: #f4f7fc; overflow: hidden; position: relative;
+  }
+  .photo-box img { display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .photo-box .cam-wrap { position: relative; }
+  .photo-box .cam-icon { font-size: 28px; color: #5fae35; display: block; }
+  .photo-box .plus-badge {
+    position: absolute; top: -3px; right: -8px; width: 15px; height: 15px; border-radius: 50%;
+    background: #3f7a1f; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 5px rgba(63,122,31,0.4);
+  }
+  .photo-box .plus-badge svg { width: 9px; height: 9px; }
+  .photo-box .hint { font-size: 10px; font-weight: 700; color: #3f7a1f; }
+  .photo-caption { text-align: center; font-size: 10.5px; color: #8a97ac; margin-bottom: 0.9rem; }
+  .photo-actions { display: none; justify-content: center; gap: 16px; margin-bottom: 0.6rem; margin-top: -0.5rem; }
+  .photo-actions button {
+    font-size: 11px; padding: 4px 10px; border-radius: 8px; border: 0.5px solid #c7cdd6;
+    background: #ffffff; cursor: pointer;
+  }
+  .photo-actions button.danger { color: #c0392b; }
+
+  .locked-photo { margin-top: 10px; }
+  .locked-photo img { width: 100%; max-width: 220px; border-radius: 10px; display: block; margin: 0 auto; }
+
+  .field-block { padding-bottom: 14px; }
+  .field-display {
+    min-height: 42px; display: flex; align-items: center;
+    border-radius: 10px; background: #f4f7fa; border: 1px solid #e6eaf0;
+    padding: 0 12px; font-size: 14px; color: #16233d; font-weight: 600;
+  }
+  .field-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .icon-circle {
+    width: 28px; height: 28px; min-width: 28px; border-radius: 50%;
+    background: #3f7a1f; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(63,122,31,0.35);
+  }
+  .icon-circle i { font-size: 14px; color: #ffffff; }
+  .field-head label { font-size: 13px; color: #16233d; }
+  .field-head label .en { color: #6f89ab; }
+  input[type="text"], select.field-select {
+    width: 100%; height: 38px; border-radius: 10px; border: 1px solid #d4dbe6;
+    padding: 0 12px; font-size: 13px; background: #ffffff; color: #16233d;
+  }
+  input[type="text"]::placeholder { color: #b3bccb; }
+  input[type="text"]:focus, select.field-select:focus {
+    outline: none; border-color: #5fae35; box-shadow: 0 0 0 2px rgba(95,174,53,0.15);
+  }
+  .select-wrap { position: relative; }
+  select.field-select {
+    appearance: none; -webkit-appearance: none; -moz-appearance: none; cursor: pointer;
+  }
+  select.field-select:invalid { color: #b3bccb; }
+  .select-wrap .chevron {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    pointer-events: none; color: #8a97ac;
+  }
+
+  .btn-primary {
+    width: 100%; margin-top: 6px; font-size: 14px; height: 44px; border-radius: 12px;
+    background: #3f7a1f; color: #ffffff; border: none; font-weight: 700; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(63,122,31,0.28);
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .btn-primary:active { transform: scale(0.99); }
+
+  .placeholder-img {
+    width: 100%; height: 230px; border-radius: 16px;
+    border: 1.5px dashed #a9c0e0; background: #f4f7fc;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ---------- รูปภาพตัวอย่างประจำขั้นตอน (อัปโหลดครั้งเดียวโดยผู้อนุมัติ ผู้ใช้ทุกคนเห็นรูปเดียวกัน) ---------- */
+  .ref-img-wrap { margin-bottom: 14px; display: none; }
+  .ref-img-label {
+    font-size: 11px; font-weight: 700; color: #6f89ab; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .ref-img {
+    width: 100%; max-height: 220px; object-fit: cover; border-radius: 14px;
+    display: block; border: 1px solid #eceff4; box-shadow: 0 6px 16px rgba(30,60,110,0.08);
+  }
+
+  /* ---------- Footer ---------- */
+  .skyline-wrap { position: relative; margin-top: 0.9rem; margin-left: 0; margin-right: 0; overflow: hidden; height: 42px; }
+  .skyline { display: block; width: 100%; height: 42px; opacity: 0.55; }
+  .footer { text-align: center; position: relative; margin-top: -6px; }
+  .footer .brand { font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; color: #16233d; letter-spacing: 0.5px; }
+  .footer .brand .link-icon {
+    width: 18px; height: 18px; border-radius: 50%; background: #3f7a1f; display: inline-flex;
+    align-items: center; justify-content: center;
+  }
+  .footer .brand .link-icon i { font-size: 11px; color: #ffffff; }
+  .footer .tag { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 4px; }
+  .footer .tag span.txt { font-size: 10px; color: #9aa7ba; letter-spacing: 3px; }
+
+  /* ---------- Activity check-in blocks ---------- */
+  .activity-card { padding: 0.2rem 0 0.4rem; }
+
+  /* ---------- หน้ากิจกรรมเข้าฐาน: แยก 3 บันทึกย่อยให้เห็นเป็นส่วนๆ ชัดเจน ---------- */
+  #page-2 .activity-slot { padding-top: 0.9rem; border-top: 1px solid #eceff4; margin-top: 0 !important; }
+  #page-2 .activity-slot:first-child { padding-top: 0.2rem; border-top: none; }
+  .activity-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .activity-title-row .icon-circle { width: 34px; height: 34px; min-width: 34px; }
+  .activity-title-row h2 { font-size: 15px; margin: 0; color: #16233d; }
+  .activity-title-row .en { font-size: 10.5px; color: #8a97ac; display: block; margin-top: 1px; }
+
+  .time-row { display: flex; gap: 10px; margin-bottom: 14px; }
+  .time-field { flex: 1; }
+  .time-field label { font-size: 11.5px; color: #6f89ab; display: block; margin-bottom: 5px; }
+  input[type="time"] {
+    width: 100%; height: 40px; border-radius: 10px; border: 1px solid #d4dbe6;
+    padding: 0 10px; font-size: 13px; background: #ffffff; color: #16233d;
+  }
+  input[type="time"]:focus { outline: none; border-color: #5fae35; box-shadow: 0 0 0 2px rgba(95,174,53,0.15); }
+
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700;
+    padding: 5px 11px; border-radius: 20px; margin-bottom: 12px;
+  }
+  .status-badge.none { background: #eef1f6; color: #8a97ac; }
+  .status-badge.pending { background: #fff6e0; color: #b8860b; }
+  .status-badge.approved { background: #e7f6e5; color: #3f7a1f; }
+  .status-badge.rejected { background: #fdecea; color: #c0392b; }
+
+  .save-msg { font-size: 11.5px; text-align: center; margin-top: 8px; min-height: 14px; }
+  .save-msg.ok { color: #3f7a1f; }
+  .save-msg.err { color: #c0392b; }
+
+  .locked-view {
+    min-height: 42px; align-items: center; border-radius: 10px;
+    background: #f4f7fa; border: 1px solid #e6eaf0; padding: 10px 12px;
+    font-size: 13px; color: #16233d; line-height: 1.6; margin-bottom: 14px;
+    white-space: pre-wrap;
+  }
+  .locked-view b { color: #3f7a1f; }
+
+
+  .btn-secondary {
+    width: 100%; margin-top: 6px; font-size: 13px; height: 40px; border-radius: 10px;
+    background: #ffffff; color: #3f7a1f; border: 1.5px solid #3f7a1f; font-weight: 700; cursor: pointer;
+  }
+  .footer .tag span.star { font-size: 9px; color: #9aa7ba; }
+
+  /* ---------- โหวตเครื่องแต่งกาย ---------- */
+  .vote-row {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 8px;
+    border-radius: 12px; border: 1.5px solid #e6eaf0; background: #f9fafb; cursor: pointer;
+  }
+  .vote-row.selected { border-color: #3f7a1f; background: #eef7e9; }
+  .vote-row img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: #e6eaf0; flex: none; }
+  .vote-row .vote-name { font-size: 13px; font-weight: 700; color: #16233d; }
+  .vote-row .vote-sub { font-size: 11px; color: #8a97ac; }
+  .vote-row input[type="radio"] { width: 17px; height: 17px; accent-color: #3f7a1f; flex: none; margin-left: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <button type="button" class="icon-btn" aria-label="ภาษา / เว็บไซต์">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18"></path></svg>
+    </button>
+    <div class="brand-center">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAUEAAACMCAYAAADiDxvvAABv50lEQVR42u19d7xcVdX2s9bep8zckkIIRaTXgCAGBCwEpIVQBe9VAVFRifrKi8jLR2fuAAqIiogFEERBQO4IAkIoAZJQLUQUISIdpIaUm1tm5pyz91rfH2fm5qbQlJLgPPxCkpsp++zy7NUX0EILLbTQQgsttNBCCy200EILLbTQQgsttNBCCy200EILLbTQQgsttNBCCy200EILLbTQQgsttNBCCy200EILLbTQQgsttNBCCy200EILLbTQQgsttNBCCy200EILLbTQQgsttNBCCy200EILLbTQQgsttNBCCy200EILLbTQQgsttNBCCy208K5DQcv92fJ+PuLfdal/b/x92fe93me10EILLawwfKigUqnEr/Z3KKhUAo98T0lL/Fqf15rVFlpoYYUmvbPuPqyjVCrxSGlt2qPnRmf/9ZC2VyMzVQ167z921MifXfZoqRMAjph2RNQgTgKAUqkrPPuWxZ+1MqDF3C208F9AfkTQk+/84nZ99efODCT92g8mz3rkjLsOWt/55IiqDu3mWYPYt9/fUe/44TFTfvlnACjd/9lxmlSPR6J7Qn0HEz1rbOf5Y+NRM+dV5/6CLDtXS0L12VOnTb7py6UZn1yrStlFXCv846w9f3sUoCvF/HBri7TQwnsbPShRftjdqizJDvVaNf72o0esOkCDv3Mm/WZa1+d9qo9k3N89WJh307dnHvxxVVB9aPDcqsu+NZD1/aW/3n95PZPQtA1e2ufnfqlWH/qlSjaaitEnatZ8+qSZBx7rkFwfsN0NhD8DiiVU6xYJttBCC+82Iq8uztrq0cDqg4PPPX2otbRlUguO2Ds+bq8f7HbbfkUavUddNRrA0LHfuf1L4wOvU8Zi/G/O2ePOQ364113H7RHeuEM2T07WRP525uSbL4919MViPTLj7lNPY+LAbt2mwdwNVh91HwD09JRXClHQtrZGCy38d6BmhepsSAth0fnnttPBsQ98auy0C7bZhlxJwSdT5Y6jbtrzCtOWfMrGwWhJzP0ZL9rvrHsO/g6lescDPPXh0h43nA4A59x35Lrzh545A5rMHF2PDi/v+dunT73hMw/V2qsXPTH/pRMV+pWVxdrWkgRbaOG/Bd5CbU2CwoIAXIw9dP7EifBQ0IuzJ5pSCUxO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" alt="gracz logo" />
+      <div class="tagline"></div>
+    </div>
+    <button type="button" class="logout-btn" aria-label="ออกจากระบบ" onclick="logout()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="10" r="3"></circle><path d="M6.5 18.2c1-2 3.1-3.2 5.5-3.2s4.5 1.2 5.5 3.2"></path></svg>
+      <span class="logout-label">ลงชื่อออก</span>
+    </button>
+  </div>
+
+  <div class="stepper-outer">
+    <div class="stepper" id="stepper">
+      <button type="button" class="step-item active" data-step="1" onclick="selectStep('1')">
+        <div class="step-row">
+          <div class="step-circle">1</div>
+          <div class="step-line" data-line="1"></div>
+        </div>
+        <div class="step-label"><span>ข้อมูล</span><span>ส่วนตัว</span></div>
+      </button>
+      <button type="button" class="step-item" data-step="2" onclick="selectStep('2')">
+        <div class="step-row">
+          <div class="step-circle">2</div>
+          <div class="step-line" data-line="2"></div>
+        </div>
+        <div class="step-label"><span>กิจกรรม</span><span>เข้าฐาน</span></div>
+      </button>
+      <button type="button" class="step-item" data-step="3" onclick="selectStep('3')">
+        <div class="step-row">
+          <div class="step-circle">3</div>
+          <div class="step-line" data-line="3"></div>
+        </div>
+        <div class="step-label"><span>Step 1</span><span>ขึ้นรูป</span></div>
+      </button>
+      <button type="button" class="step-item" data-step="4" onclick="selectStep('4')">
+        <div class="step-row">
+          <div class="step-circle">4</div>
+          <div class="step-line" data-line="4"></div>
+        </div>
+        <div class="step-label"><span>Step 2</span><span>ตัดขอบ</span></div>
+      </button>
+      <button type="button" class="step-item" data-step="5" onclick="selectStep('5')">
+        <div class="step-row">
+          <div class="step-circle">5</div>
+          <div class="step-line" data-line="5"></div>
+        </div>
+        <div class="step-label"><span>Step 3</span><span>ตรวจสอบ</span></div>
+      </button>
+      <button type="button" class="step-item" data-step="6" onclick="selectStep('6')">
+        <div class="step-row">
+          <div class="step-circle">6</div>
+          <div class="step-line" data-line="6"></div>
+        </div>
+        <div class="step-label"><span>Step 4</span><span>แพ็คสินค้า</span></div>
+      </button>
+      <button type="button" class="step-item" data-step="7" onclick="selectStep('7')">
+        <div class="step-row">
+          <div class="step-circle">7</div>
+          <div class="step-line" data-line="7"></div>
+        </div>
+        <div class="step-label"><span>บันทึก</span><span>การเรียนรู้</span></div>
+      </button>
+      <button type="button" class="step-item" data-step="8" onclick="selectStep('8')">
+        <div class="step-row">
+          <div class="step-circle">8</div>
+          <div class="step-line" data-line="8"></div>
+        </div>
+        <div class="step-label"><span>Iron</span><span>Chef</span></div>
+      </button>
+      <button type="button" class="step-item" data-step="9" onclick="selectStep('9')">
+        <div class="step-row">
+          <div class="step-circle">9</div>
+          <div class="step-line" data-line="9"></div>
+        </div>
+        <div class="step-label"><span>คะแนน</span><span>ของฉัน</span></div>
+      </button>
+      <button type="button" class="step-item" data-step="10" onclick="selectStep('10')">
+        <div class="step-row">
+          <div class="step-circle">10</div>
+          
+        </div>
+        <div class="step-label"><span>โหวต</span><span>ชุดแต่งกาย</span></div>
+      </button>
+    </div>
+  </div>
+
+  <h1 id="pageTitle">✦ ข้อมูลส่วนตัว ✦</h1>
+  <div class="sub-row">
+    <div class="line"></div><span class="star">◆</span><div class="line"></div>
+  </div>
+
+  <div class="card">
+    <div class="page-panel" id="page-1">
+    <input type="file" id="photoInput" accept="image/*" capture="environment" style="display:none;" />
+    <div class="photo-wrap">
+      <div class="photo-box" id="photoBox">
+        <img id="photoPreview" />
+        <div class="cam-wrap" id="camWrap">
+          <svg class="cam-icon" id="cameraIcon" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#5fae35" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"></path><circle cx="12" cy="13" r="3.5"></circle></svg>
+          <span class="plus-badge" id="plusBadge"><svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg></span>
+        </div>
+        <span class="hint" id="photoHint">เพิ่มรูปภาพ</span>
+      </div>
+    </div>
+    <div class="photo-caption" id="photoCaption">อัปโหลดรูปถ่ายของคุณ</div>
+    <div class="photo-actions" id="photoActions">
+      <button type="button" id="retakeBtn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M20 11a8 8 0 1 0-2.3 5.7"></path><path d="M20 5v6h-6"></path></svg>เปลี่ยนรูป</button>
+      <button type="button" id="removeBtn" class="danger"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:3px;"><path d="M4 7h16"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"></path><path d="M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3"></path></svg>ลบรูป</button>
+    </div>
+    <div class="save-msg" id="profilePhotoMsg" style="margin-bottom:0.6rem;"></div>
+
+    <div class="field-block">
+      <div class="field-head">
+        <div class="icon-circle"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.5-7 8-7s8 3 8 7"></path></svg></div>
+        <label>ชื่อ-นามสกุล <span class="en">/ Name</span></label>
+      </div>
+      <div class="field-display" id="fullNameInput">-</div>
+    </div>
+
+    <div class="field-block">
+      <div class="field-head">
+        <div class="icon-circle"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M8 10h.01"></path><path d="M16 10h.01"></path><path d="M8 15c1.2 1.3 2.6 2 4 2s2.8-.7 4-2"></path></svg></div>
+        <label>ชื่อเล่น <span class="en">/ Nickname</span></label>
+      </div>
+      <div class="field-display" id="nicknameInput">-</div>
+    </div>
+
+    <div class="field-block" style="padding-bottom:0;">
+      <div class="field-head">
+        <div class="icon-circle"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="12" rx="2"></rect><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M3 13h18"></path></svg></div>
+        <label>ฝ่าย <span class="en">/ Department</span></label>
+      </div>
+      <div class="field-display" id="departmentInput">-</div>
+    </div>
+
+    <button class="btn-primary" id="nextBtn">ถัดไป <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6l-6 6"></path></svg></button>
+    </div>
+
+    <div class="page-panel" id="page-2" style="display:none;">
+      <div class="activity-card activity-slot" data-slot="2a" data-activity-key="checkin_ฐาน_standard" data-activity-name="กิจกรรมเข้าฐาน - บันทึกเวลาของระบบมาตรฐาน">
+        <div class="activity-title-row">
+          <div class="icon-circle"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M5 21V7l7-4l7 4v14"></path><path d="M9 21v-6h6v6"></path></svg></div>
+          <div><h2>1.ระบบมาตรฐาน</h2><span class="en">Standard System</span></div>
+        </div>
+        <div class="status-badge none" id="status-2a">ยังไม่บันทึก</div>
+        <div class="locked-view" id="lockedView-2a" style="display:none;"></div>
+        <div id="editArea-2a">
+          <div class="time-row">
+            <div class="time-field"><label>เวลาเข้า</label><input type="time" id="timeIn-2a" /></div>
+            <div class="time-field"><label>เวลาออก</label><input type="time" id="timeOut-2a" /></div>
+          </div>
+          <button class="btn-primary" onclick="saveActivity('2a')">บันทึกเวลา</button>
+        </div>
+        <div class="save-msg" id="saveMsg-2a"></div>
+      </div>
+
+      <div class="activity-card activity-slot" data-slot="2b" data-activity-key="checkin_ฐาน_sustain" data-activity-name="กิจกรรมเข้าฐาน - บันทึกเวลาความยั่งยืน">
+        <div class="activity-title-row">
+          <div class="icon-circle"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"></path><path d="M12 2a10 10 0 0 1 0 20"></path><path d="M12 7v5l3 3"></path></svg></div>
+          <div><h2>2.ความยั่งยืน</h2><span class="en">Sustainability</span></div>
+        </div>
+        <div class="status-badge none" id="status-2b">ยังไม่บันทึก</div>
+        <div class="locked-view" id="lockedView-2b" style="display:none;"></div>
+        <div id="editArea-2b">
+          <div class="time-row">
+            <div class="time-field"><label>เวลาเข้า</label><input type="time" id="timeIn-2b" /></div>
+            <div class="time-field"><label>เวลาออก</label><input type="time" id="timeOut-2b" /></div>
+          </div>
+          <button class="btn-primary" onclick="saveActivity('2b')">บันทึกเวลา</button>
+        </div>
+        <div class="save-msg" id="saveMsg-2b"></div>
+      </div>
+
+      <div class="activity-card activity-slot" data-slot="2c" data-activity-key="checkin_ฐาน_lab" data-activity-name="กิจกรรมเข้าฐาน - บันทึกเวลา LAB กริ๊ง">
+        <div class="activity-title-row">
+          <div class="icon-circle"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6l-5 8a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3l-5-8V2"></path><path d="M9 2h6"></path></svg></div>
+          <div><h2>3.LAB กริ๊ง</h2><span class="en">LAB Kring</span></div>
+        </div>
+        <div class="status-badge none" id="status-2c">ยังไม่บันทึก</div>
+        <div class="locked-view" id="lockedView-2c" style="display:none;"></div>
+        <div id="editArea-2c">
+          <div class="time-row">
+            <div class="time-field"><label>เวลาเข้า</label><input type="time" id="timeIn-2c" /></div>
+            <div class="time-field"><label>เวลาออก</label><input type="time" id="timeOut-2c" /></div>
+          </div>
+          <button class="btn-primary" onclick="saveActivity('2c')">บันทึกเวลา</button>
+        </div>
+        <div class="save-msg" id="saveMsg-2c"></div>
+      </div>
+    </div>
+
+    <div class="page-panel activity-card activity-slot" id="page-3" data-slot="3" style="display:none;" data-activity-key="step1_ขึ้นรูป" data-activity-name="Step 1 ขึ้นรูป">
+      <div class="activity-title-row">
+        <div class="icon-circle"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="M21 15l-5-5L5 21"></path></svg></div>
+        <div><h2>Step 1 ขึ้นรูป</h2><span class="en">Forming</span></div>
+      </div>
+      <div class="status-badge none" id="status-3">ยังไม่บันทึก</div>
+      <div class="ref-img-wrap" id="refImgWrap-step1_ขึ้นรูป">
+        <div class="ref-img-label">📌 ตัวอย่างขั้นตอนนี้</div>
+        <img class="ref-img" id="refImg-step1_ขึ้นรูป" alt="ตัวอย่าง Step 1 ขึ้นรูป" />
+      </div>
+      <div class="locked-view" id="lockedView-3" style="display:none;"></div>
+      <div id="editArea-3">
+        <div class="time-row">
+          <div class="time-field"><label>เวลาเข้า</label><input type="time" id="timeIn-3" /></div>
+          <div class="time-field"><label>เวลาออก</label><input type="time" id="timeOut-3" /></div>
+        </div>
+        <button class="btn-primary" onclick="saveActivity('3')">บันทึกเวลา</button>
+      </div>
+      <div class="save-msg" id="saveMsg-3"></div>
+    </div>
+
+    <div class="page-panel activity-card activity-slot" id="page-4" data-slot="4" style="display:none;" data-activity-key="step2_ตัดขอบ" data-activity-name="Step 2 ตัดขอบ">
+      <div class="activity-title-row">
+        <div class="icon-circle"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12"></path><path d="M6 18L18 6"></path></svg></div>
+        <div><h2>Step 2 ตัดขอบ</h2><span class="en">Cutting</span></div>
+      </div>
+      <div class="status-badge none" id="status-4">ยังไม่บันทึก</div>
+      <div class="ref-img-wrap" id="refImgWrap-step2_ตัดขอบ">
+        <div class="ref-img-label">📌 ตัวอย่างขั้นตอนนี้</div>
+        <img class="ref-img" id="refImg-step2_ตัดขอบ" alt="ตัวอย่าง Step 2 ตัดขอบ" />
+      </div>
+      <div class="locked-view" id="lockedView-4" style="display:none;"></div>
+      <div id="editArea-4">
+        <div class="time-row">
+          <div class="time-field"><label>เวลาเข้า</label><input type="time" id="timeIn-4" /></div>
+          <div class="time-field"><label>เวลาออก</label><input type="time" id="timeOut-4" /></div>
+        </div>
+        <button class="btn-primary" onclick="saveActivity('4')">บันทึกเวลา</button>
+      </div>
+      <div class="save-msg" id="saveMsg-4"></div>
+    </div>
+
+    <div class="page-panel activity-card activity-slot" id="page-5" data-slot="5" style="display:none;" data-activity-key="step3_ตรวจสอบ" data-activity-name="Step 3 ตรวจสอบ">
+      <div class="activity-title-row">
+        <div class="icon-circle"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2l4-4"></path><circle cx="12" cy="12" r="9"></circle></svg></div>
+        <div><h2>Step 3 ตรวจสอบ</h2><span class="en">Appearance</span></div>
+      </div>
+      <div class="status-badge none" id="status-5">ยังไม่บันทึก</div>
+      <div class="ref-img-wrap" id="refImgWrap-step3_ตรวจสอบ">
+        <div class="ref-img-label">📌 ตัวอย่างขั้นตอนนี้</div>
+        <img class="ref-img" id="refImg-step3_ตรวจสอบ" alt="ตัวอย่าง Step 3 ตรวจสอบ" />
+      </div>
+      <div class="locked-view" id="lockedView-5" style="display:none;"></div>
+      <div id="editArea-5">
+        <div class="time-row">
+          <div class="time-field"><label>เวลาเข้า</label><input type="time" id="timeIn-5" /></div>
+          <div class="time-field"><label>เวลาออก</label><input type="time" id="timeOut-5" /></div>
+        </div>
+        <button class="btn-primary" onclick="saveActivity('5')">บันทึกเวลา</button>
+      </div>
+      <div class="save-msg" id="saveMsg-5"></div>
+    </div>
+
+    <div class="page-panel activity-card activity-slot" id="page-6" data-slot="6" style="display:none;" data-activity-key="step4_แพ็คสินค้า" data-activity-name="Step 4 แพ็คสินค้า">
+      <div class="activity-title-row">
+        <div class="icon-circle"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5l-9 5l9 5l9-5z"></path><path d="M3 8v8l9 5l9-5V8"></path><path d="M12 13v8"></path></svg></div>
+        <div><h2>Step 4 แพ็คสินค้า</h2><span class="en">Packing</span></div>
+      </div>
+      <div class="status-badge none" id="status-6">ยังไม่บันทึก</div>
+      <div class="ref-img-wrap" id="refImgWrap-step4_แพ็คสินค้า">
+        <div class="ref-img-label">📌 ตัวอย่างขั้นตอนนี้</div>
+        <img class="ref-img" id="refImg-step4_แพ็คสินค้า" alt="ตัวอย่าง Step 4 แพ็คสินค้า" />
+      </div>
+      <div class="locked-view" id="lockedView-6" style="display:none;"></div>
+      <div id="editArea-6">
+        <div class="time-row">
+          <div class="time-field"><label>เวลาเข้า</label><input type="time" id="timeIn-6" /></div>
+          <div class="time-field"><label>เวลาออก</label><input type="time" id="timeOut-6" /></div>
+        </div>
+        <button class="btn-primary" onclick="saveActivity('6')">บันทึกเวลา</button>
+      </div>
+      <div class="save-msg" id="saveMsg-6"></div>
+    </div>
+
+    <div class="page-panel activity-card activity-slot" id="page-7" data-slot="7" style="display:none;" data-activity-key="learning_note" data-activity-name="บันทึกการเรียนรู้">
+      <div class="activity-title-row">
+        <div class="icon-circle"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg></div>
+        <div><h2>บันทึกการเรียนรู้</h2><span class="en">Learning Notes</span></div>
+      </div>
+      <div class="status-badge none" id="status-7">ยังไม่บันทึก</div>
+      <div class="locked-view" id="lockedView-7" style="display:none;"></div>
+      <div id="editArea-7">
+        <div class="field-block">
+          <textarea id="noteText-7" rows="5" placeholder="พิมพ์สิ่งที่ได้เรียนรู้จากกิจกรรมวันนี้..." style="width:100%;border-radius:10px;border:1px solid #d4dbe6;padding:10px 12px;font-size:13px;color:#16233d;font-family:inherit;resize:vertical;"></textarea>
+        </div>
+        <button class="btn-primary" onclick="saveActivity('7')">บันทึก</button>
+      </div>
+      <div class="save-msg" id="saveMsg-7"></div>
+    </div>
+
+    <div class="page-panel activity-card activity-slot" id="page-8" data-slot="8" style="display:none;" data-activity-key="iron_chef" data-activity-name="Iron Chef">
+      <div class="activity-title-row">
+        <div class="icon-circle"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7a4 4 0 0 0 4 4v9"></path><path d="M7 2v7"></path><path d="M11 2v7"></path><path d="M17 2c-2 2-2 4-2 6a3 3 0 0 0 3 3v11"></path></svg></div>
+        <div><h2>Iron Chef</h2><span class="en">Group Activity</span></div>
+      </div>
+      <div class="save-msg ok" style="margin-bottom:10px;">✦ กิจกรรมนี้ให้คะแนนเป็นแบบกลุ่ม ทุกคนในกลุ่มเดียวกันจะได้คะแนนเท่ากัน ดูผลได้ที่หน้า "คะแนนของฉัน" ✦</div>
+      <div class="status-badge none" id="status-8">ยังไม่บันทึก</div>
+      <div class="locked-view" id="lockedView-8" style="display:none;"></div>
+      <div id="editArea-8">
+        <div class="time-row">
+          <div class="time-field"><label>เวลาเข้า</label><input type="time" id="timeIn-8" /></div>
+          <div class="time-field"><label>เวลาออก</label><input type="time" id="timeOut-8" /></div>
+        </div>
+        <button class="btn-primary" onclick="saveActivity('8')">บันทึกเวลา</button>
+      </div>
+      <div class="save-msg" id="saveMsg-8"></div>
+    </div>
+
+    <div class="page-panel" id="page-9" style="display:none;">
+      <div class="activity-title-row">
+        <div class="icon-circle"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6l7.1.6l-5.4 4.7l1.6 6.9L12 17.3L5.8 20.8l1.6-6.9L2 9.2l7.1-.6z"></path></svg></div>
+        <div><h2>คะแนนของฉัน</h2><span class="en">My Scores</span></div>
+      </div>
+      <div id="scoreSummaryLoading" class="save-msg">กำลังโหลดคะแนน...</div>
+      <div id="scoreSummaryContent" style="display:none;">
+        <div class="field-block">
+          <div class="field-head"><label>กลุ่มของฉัน <span class="en">/ Group</span></label></div>
+          <div class="field-display" id="myGroupDisplay">-</div>
+        </div>
+        <div class="field-block">
+          <div class="field-head"><label>คะแนนกลุ่ม Iron Chef</label></div>
+          <div class="field-display" id="ironChefScoreDisplay">-</div>
+        </div>
+        <div class="field-block">
+          <div class="field-head"><label>คะแนน (เข้าฐาน / ขึ้นรูป / ตัดขอบ / ตรวจสอบ / แพ็ค)</label></div>
+          <div class="locked-view" id="individualScoreBreakdown" style="display:block;">ยังไม่มีคะแนน</div>
+          <div class="field-display" id="individualScoreTotal" style="margin-top:8px;font-weight:700;">รวมคะแนนฐานกิจกรรม: 0</div>
+        </div>
+        <div class="field-block">
+          <div class="field-head"><label>รวมคะแนนกลุ่ม + ฐานกิจกรรม</label></div>
+          <div class="field-display" id="totalScoreDisplay" style="font-size:18px;font-weight:700;color:#3f7a1f;">0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-panel" id="page-10" style="display:none;">
+      <div class="activity-title-row">
+        <div class="icon-circle"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></div>
+        <div><h2>โหวตเครื่องแต่งกาย</h2><span class="en">Outfit Vote</span></div>
+      </div>
+      <div id="voteLoading" class="save-msg">กำลังโหลดรายชื่อ...</div>
+      <div id="voteLockedMsg" class="save-msg ok" style="display:none;"></div>
+      <div id="voteListContainer" style="display:none;"></div>
+      <button class="btn-primary" id="submitVoteBtn" style="display:none;" onclick="submitVote()">ยืนยันการโหวต</button>
+      <div class="save-msg" id="voteMsg"></div>
+    </div>
+  </div>
+
+  <div class="skyline-wrap">
+    <svg class="skyline" viewBox="0 0 400 70" preserveAspectRatio="none">
+      <path d="M0,55 L0,45 L14,45 L14,35 L28,35 L28,42 L40,42 L40,20 L54,20 L54,38 L68,38 L68,48 L82,48 L82,30 L96,30 L96,50 L400,50 L400,70 L0,70 Z" fill="#c9d7ec"></path>
+      <path d="M400,60 L400,50 L386,50 L386,38 L372,38 L372,45 L358,45 L358,25 L344,25 L344,42 L330,42 L330,55 L316,55 L316,35 L302,35 L302,55 L0,55 L0,70 L400,70 Z" fill="#dbe5f2"></path>
+    </svg>
+  </div>
+
+  <div class="footer">
+    <div class="brand">TEAM <span class="link-icon"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"></path><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"></path></svg></span> CONNECT CHAINAT</div>
+    <div class="tag"><span class="star">✦</span><span class="txt">PASSPORT</span><span class="star">✦</span></div>
+  </div>
+
+</div>
+
+<script>
+  const photoInput = document.getElementById('photoInput');
+  const photoBox = document.getElementById('photoBox');
+  const photoPreview = document.getElementById('photoPreview');
+  const camWrap = document.getElementById('camWrap');
+  const photoHint = document.getElementById('photoHint');
+  const photoActions = document.getElementById('photoActions');
+  const photoCaption = document.getElementById('photoCaption');
+  const retakeBtn = document.getElementById('retakeBtn');
+  const removeBtn = document.getElementById('removeBtn');
+
+  // ---------- ตัวช่วยย่อรูปก่อนอัปโหลด (กันไฟล์ใหญ่เกินไป ทั้งเปลืองพื้นที่ Drive และช้าตอนส่ง) ----------
+  function resizeImageToBase64(file, maxDim, quality) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = function (ev) {
+        const img = new Image();
+        img.onload = function () {
+          let w = img.width, h = img.height;
+          if (w > maxDim || h > maxDim) {
+            if (w >= h) { h = Math.round(h * (maxDim / w)); w = maxDim; }
+            else { w = Math.round(w * (maxDim / h)); h = maxDim; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', quality || 0.75));
+        };
+        img.onerror = reject;
+        img.src = ev.target.result;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+  function base64FromDataUrl(dataUrl) {
+    return dataUrl.split(',')[1];
+  }
+
+  photoBox.addEventListener('click', function () { photoInput.click(); });
+
+  photoInput.addEventListener('change', function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (ev) {
+      photoPreview.src = ev.target.result;
+      photoPreview.style.display = 'block';
+      camWrap.style.display = 'none';
+      photoHint.style.display = 'none';
+      photoActions.style.display = 'flex';
+      photoCaption.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+
+    // อัปโหลดขึ้น Google Drive จริงในพื้นหลัง แล้วบันทึกลิงก์ลงคอลัมน์ Photo ในชีต Users ทันที
+    const msgEl = document.getElementById('profilePhotoMsg');
+    msgEl.className = 'save-msg';
+    msgEl.textContent = 'กำลังอัปโหลดรูป...';
+    resizeImageToBase64(file, 800, 0.75).then(dataUrl => {
+      return callApi({
+        action: 'updateProfilePhoto',
+        employeeId: currentUser.employeeId,
+        imageBase64: base64FromDataUrl(dataUrl),
+        mimeType: 'image/jpeg',
+        filename: 'profile_' + currentUser.employeeId + '.jpg'
+      });
+    }).then(result => {
+      if (result.ok) {
+        msgEl.className = 'save-msg ok';
+        msgEl.textContent = 'อัปโหลดรูปสำเร็จ';
+        currentUser.photo = result.url;
+        localStorage.setItem('tcp_user', JSON.stringify(currentUser));
+      } else {
+        msgEl.className = 'save-msg err';
+        msgEl.textContent = result.message || 'อัปโหลดรูปไม่สำเร็จ';
+      }
+    }).catch(() => {
+      msgEl.className = 'save-msg err';
+      msgEl.textContent = 'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ';
+    });
+  });
+
+  retakeBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    photoInput.click();
+  });
+
+  removeBtn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    photoInput.value = '';
+    photoPreview.src = '';
+    photoPreview.style.display = 'none';
+    camWrap.style.display = 'block';
+    photoHint.style.display = 'block';
+    photoActions.style.display = 'none';
+    photoCaption.style.display = 'block';
+  });
+
+  // ---------- Stepper interaction ----------
+  const stepItems = Array.from(document.querySelectorAll('.step-item'));
+  const pageTitles = {
+    "1": "ข้อมูลส่วนตัว",
+    "2": "กิจกรรมเข้าฐาน",
+    "3": "Step 1 ขึ้นรูป",
+    "4": "Step 2 ตัดขอบ",
+    "5": "Step 3 ตรวจสอบ",
+    "6": "Step 4 แพ็คสินค้า",
+    "7": "บันทึกการเรียนรู้",
+    "8": "Iron Chef",
+    "9": "คะแนนของฉัน",
+    "10": "โหวตเครื่องแต่งกาย"
+  };
+  const pageTitleEl = document.getElementById('pageTitle');
+  const panels = Array.from(document.querySelectorAll('.page-panel'));
+
+  function selectStep(stepNum) {
+    const targetIndex = stepItems.findIndex(el => el.dataset.step === stepNum);
+    // ไฮไลต์สีเขียวเฉพาะเลขที่กดเลือกเท่านั้น ไม่ไล่สีเขียวย้อนไปทับเลขก่อนหน้าอีกต่อไป
+    stepItems.forEach((el, idx) => {
+      el.classList.remove('active', 'done');
+      if (idx === targetIndex) el.classList.add('active');
+    });
+    // หมายเหตุ: ตั้งใจไม่เลื่อนแถบ stepper อัตโนมัติตอนกดเลือกเลขขั้นตอน
+    // (เดิมมี scrollIntoView ทำให้แถบขยับไปทางซ้ายทุกครั้งที่กด ผู้ใช้ไม่ต้องการพฤติกรรมนี้)
+
+    panels.forEach(p => { p.style.display = (p.id === 'page-' + stepNum) ? 'block' : 'none'; });
+    if (pageTitleEl && pageTitles[stepNum]) {
+      pageTitleEl.textContent = '✦ ' + pageTitles[stepNum] + ' ✦';
+    }
+    // โหลดข้อมูลแบบขี้เกียจ (lazy) เฉพาะตอนเปิดหน้านั้นจริงๆ ไม่ต้องยิง API ล่วงหน้าตั้งแต่โหลดหน้าแรก
+    if (stepNum === '9') loadScoreSummary();
+    if (stepNum === '10') loadVoteCandidates();
+  }
+  window.selectStep = selectStep;
+
+  document.getElementById('nextBtn').addEventListener('click', function () {
+    selectStep('2');
+  });
+
+  // ==================================================================
+  // เชื่อมต่อ Google Sheet ผ่าน Google Apps Script
+  // ==================================================================
+  // ตั้งค่า URL ของ Web App ที่ deploy จาก Code.gs (ดูวิธีที่คอมเมนต์บนสุดของ Code.gs)
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyO96avgC5YUxykS-RTP_SfsTBxaaNkt8aH4x5-Zk5IqNhg39xw4CrjBAxdg0r2tNBzEQ/exec';
+
+  const currentUser = JSON.parse(localStorage.getItem('tcp_user') || 'null');
+  if (!currentUser || currentUser.role !== 'user') {
+    // ยังไม่ได้ล็อกอิน หรือบัญชีนี้ไม่ใช่ผู้ใช้งาน -> เด้งกลับไปหน้า login
+    window.location.href = 'login.html';
+  }
+
+  function logout() {
+    localStorage.removeItem('tcp_user');
+    window.location.href = 'login.html';
+  }
+  window.logout = logout;
+
+  async function callApi(payload) {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    return res.json();
+  }
+
+  // ---------- แสดงข้อมูลส่วนตัวหน้า 1 ----------
+  // ใช้ข้อมูลที่ได้ตอน login ที่เก็บไว้ใน localStorage อยู่แล้ว แทนที่จะยิง API ซ้ำ
+  // (ทำให้หน้าโหลดเร็วขึ้นมาก เพราะไม่ต้องรอ Apps Script ตอบกลับอีกรอบ)
+  const DEPARTMENT_LABELS = {
+    general: 'ฝ่ายทั่วไป',
+    sales: 'ฝ่ายขาย',
+    production: 'ฝ่ายผลิต',
+    account: 'ฝ่ายบัญชี',
+    hr: 'ฝ่ายบุคคล'
+  };
+
+  function showProfile() {
+    document.getElementById('fullNameInput').textContent = currentUser.fullName || '-';
+    document.getElementById('nicknameInput').textContent = currentUser.nickname || '-';
+    const dept = currentUser.department || '';
+    document.getElementById('departmentInput').textContent = DEPARTMENT_LABELS[dept] || dept || '-';
+    if (currentUser.photo) {
+      photoPreview.src = currentUser.photo;
+      photoPreview.style.display = 'block';
+      camWrap.style.display = 'none';
+      photoHint.style.display = 'none';
+      photoCaption.style.display = 'none';
+    }
+  }
+
+  // ---------- โหลด/อัปเดตสถานะกิจกรรมแบบเรียลไทม์ ----------
+  const STATUS_LABEL = {
+    none: 'ยังไม่บันทึก',
+    pending: 'รอผู้อนุมัติตรวจสอบ',
+    approved: 'อนุมัติแล้ว',
+    rejected: 'ไม่อนุมัติ (กรุณาบันทึกใหม่)'
+  };
+
+  function escapeHtml(str) {
+    return String(str || '').replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  // เก็บสถานะล่าสุดที่รู้ไว้ เพื่อเทียบตอน poll ใหม่ (จะได้ไม่ต้องเขียนทับช่องเวลาที่ผู้ใช้กำลังพิมพ์อยู่)
+  const lastKnownStatus = {};
+
+  // ล็อกฟอร์ม (แสดงเวลาที่บันทึกไว้เป็นข้อความค้างไว้ ซ่อนช่องกรอก+ปุ่มบันทึก) เมื่อสถานะเป็น pending/approved
+  // ปลดล็อกฟอร์มให้กรอก/บันทึกใหม่ได้ เฉพาะตอนสถานะเป็น rejected (หรือยังไม่เคยบันทึก)
+  function applyLockState(stepNum, status, act) {
+    const editArea = document.getElementById('editArea-' + stepNum);
+    const lockedView = document.getElementById('lockedView-' + stepNum);
+    if (!editArea || !lockedView) return;
+
+    const locked = (status === 'pending' || status === 'approved');
+
+    if (locked) {
+      if (stepNum === '7') {
+        lockedView.innerHTML = escapeHtml(act && act.Remark ? act.Remark : '-');
+      } else {
+        const dateVal = act && act.Date ? act.Date : 'ไม่มีข้อมูลวันที่ (รายการเก่า)';
+        const timeIn = act && act.TimeIn ? act.TimeIn : '-';
+        const timeOut = act && act.TimeOut ? act.TimeOut : '-';
+        lockedView.innerHTML = '<b>วันที่:</b> ' + escapeHtml(dateVal) +
+          '&nbsp;&nbsp;<b>เวลาเข้า:</b> ' + escapeHtml(timeIn) +
+          '&nbsp;&nbsp;<b>เวลาออก:</b> ' + escapeHtml(timeOut);
+      }
+      if (act && act.PhotoUrl) {
+        lockedView.innerHTML += '<div class="locked-photo"><img src="' + escapeHtml(act.PhotoUrl) + '" alt="รูปแนบ" /></div>';
+      }
+      lockedView.style.display = 'block';
+      editArea.style.display = 'none';
+    } else {
+      lockedView.style.display = 'none';
+      editArea.style.display = '';
+      // ปลดล็อก (เช่นตอน rejected) ให้เติมค่าที่เคยกรอกไว้กลับเข้าไปในฟอร์ม เผื่อแก้แค่บางส่วนแล้วส่งใหม่
+      if (stepNum === '7') {
+        const noteEl = document.getElementById('noteText-7');
+        if (noteEl && act && act.Remark) noteEl.value = act.Remark;
+      } else {
+        const timeInEl = document.getElementById('timeIn-' + stepNum);
+        const timeOutEl = document.getElementById('timeOut-' + stepNum);
+        // ค่าที่เก็บไว้เป็น "09.30" (จุด) แต่ <input type="time"> ต้องการ "09:30" (โคลอน) เท่านั้น ต้องแปลงกลับก่อน
+        if (timeInEl && act && act.TimeIn) timeInEl.value = String(act.TimeIn).replace('.', ':');
+        if (timeOutEl && act && act.TimeOut) timeOutEl.value = String(act.TimeOut).replace('.', ':');
+      }
+    }
+  }
+
+  async function loadActivities(isBackgroundPoll) {
+    try {
+      const result = await callApi({ action: 'getActivities', employeeId: currentUser.employeeId });
+      if (!result.ok) return;
+      result.activities.forEach(act => {
+        const panel = document.querySelector('.activity-slot[data-activity-key="' + act.ActivityKey + '"]');
+        if (!panel) return;
+        const stepNum = panel.dataset.slot;
+        const status = act.Status || 'pending';
+        const statusChanged = lastKnownStatus[stepNum] !== status;
+
+        // ล็อก/ปลดล็อกฟอร์ม + เติมค่า เฉพาะตอนโหลดครั้งแรก หรือตอนสถานะเปลี่ยนจริง (เช่นเพิ่งถูกอนุมัติ/ไม่อนุมัติ)
+        // ไม่ทำถ้าเป็น poll พื้นหลังและสถานะยังเหมือนเดิม เพื่อไม่ทับข้อมูลที่ผู้ใช้กำลังกรอกอยู่
+        if (!isBackgroundPoll || statusChanged) {
+          applyLockState(stepNum, status, act);
+        }
+
+        // อัปเดตป้ายสถานะเสมอที่สถานะเปลี่ยน เพื่อให้เห็นผลอนุมัติแบบเรียลไทม์
+        if (statusChanged) {
+          lastKnownStatus[stepNum] = status;
+          setStatusBadge(stepNum, status);
+        }
+      });
+    } catch (err) {
+      console.error('โหลดกิจกรรมไม่สำเร็จ', err);
+    }
+  }
+
+  function setStatusBadge(stepNum, status) {
+    const badge = document.getElementById('status-' + stepNum);
+    if (!badge) return;
+    const s = status && STATUS_LABEL[status] ? status : 'none';
+    badge.className = 'status-badge ' + s;
+    badge.textContent = STATUS_LABEL[s];
+  }
+
+  // ---------- บันทึกกิจกรรม (เวลาเข้า/ออก หรือบันทึกการเรียนรู้) ไปยัง Google Sheet ----------
+  async function saveActivity(stepNum) {
+    const panel = document.querySelector('.activity-slot[data-slot="' + stepNum + '"]');
+    const activityKey = panel.dataset.activityKey;
+    const activityName = panel.dataset.activityName;
+    const msgEl = document.getElementById('saveMsg-' + stepNum);
+    const btnEl = panel.querySelector('.btn-primary');
+
+    const timeInEl = document.getElementById('timeIn-' + stepNum);
+    const timeOutEl = document.getElementById('timeOut-' + stepNum);
+    const noteEl = document.getElementById('noteText-' + stepNum);
+
+    if (timeInEl && (!timeInEl.value || !timeOutEl.value)) {
+      msgEl.className = 'save-msg err';
+      msgEl.textContent = 'กรุณากรอกเวลาเข้าและเวลาออกให้ครบ';
+      return;
+    }
+
+    // กันกดบันทึกซ้ำระหว่างรอ server ตอบกลับ
+    if (btnEl) btnEl.disabled = true;
+    msgEl.className = 'save-msg';
+    msgEl.textContent = 'กำลังบันทึก...';
+
+    // เก็บสถานะเดิมไว้ เผื่อต้อง revert ถ้าบันทึกไม่สำเร็จ
+    const previousStatus = lastKnownStatus[stepNum];
+
+    // ส่งวันที่ปัจจุบัน (ตามเครื่องผู้ใช้) ไปด้วย เพื่อให้ server เก็บเป็นคอลัมน์ Date แยกออกจาก TimeIn/TimeOut
+    const now = new Date();
+    const pad = n => String(n).padStart(2, '0');
+    const todayStr = pad(now.getDate()) + '/' + pad(now.getMonth() + 1) + '/' + now.getFullYear();
+
+    try {
+      const result = await callApi({
+        action: 'saveActivity',
+        employeeId: currentUser.employeeId,
+        fullName: currentUser.fullName,
+        activityKey: activityKey,
+        activityName: activityName,
+        date: todayStr,
+        timeIn: timeInEl ? timeInEl.value : '',
+        timeOut: timeOutEl ? timeOutEl.value : '',
+        remark: noteEl ? noteEl.value : ''
+      });
+
+      if (result.ok) {
+        msgEl.className = 'save-msg ok';
+        msgEl.textContent = result.message || 'บันทึกสำเร็จ';
+        lastKnownStatus[stepNum] = 'pending';
+        setStatusBadge(stepNum, 'pending');
+        // ล็อกฟอร์มทันที ไม่ต้องรอ poll รอบถัดไป: แสดงวันที่/เวลาที่เพิ่งบันทึกเป็นข้อความค้างไว้ ซ่อนช่องกรอก+ปุ่ม
+        applyLockState(stepNum, 'pending', {
+          Date: todayStr,
+          TimeIn: timeInEl && timeInEl.value ? timeInEl.value.replace(':', '.') : '',
+          TimeOut: timeOutEl && timeOutEl.value ? timeOutEl.value.replace(':', '.') : '',
+          Remark: noteEl ? noteEl.value : ''
+        });
+      } else {
+        msgEl.className = 'save-msg err';
+        msgEl.textContent = result.message || 'บันทึกไม่สำเร็จ';
+        if (previousStatus) setStatusBadge(stepNum, previousStatus);
+      }
+    } catch (err) {
+      msgEl.className = 'save-msg err';
+      msgEl.textContent = 'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ';
+      if (previousStatus) setStatusBadge(stepNum, previousStatus);
+    } finally {
+      // ถ้าบันทึกสำเร็จ ฟอร์มถูกล็อก/ซ่อนไปแล้วโดย applyLockState ไม่ต้องเปิดปุ่มกลับมา
+      const editArea = document.getElementById('editArea-' + stepNum);
+      if (btnEl && editArea && editArea.style.display !== 'none') {
+        btnEl.disabled = false;
+      }
+    }
+  }
+  window.saveActivity = saveActivity;
+
+  // ---------- รูปภาพตัวอย่างประจำขั้นตอน (อัปโหลดครั้งเดียวโดยผู้อนุมัติจากหน้า approver.html) ----------
+  // โหลดครั้งเดียวตอนเปิดหน้า: ทุก user จะเห็นรูปเดียวกันในแต่ละขั้นตอน (2-6) ตาม stepKey ที่ตรงกับ ActivityKey
+  async function loadStepImages() {
+    try {
+      const result = await callApi({ action: 'getStepImages' });
+      if (!result.ok) return;
+      const images = result.images || {};
+      Object.keys(images).forEach(stepKey => {
+        const url = images[stepKey];
+        if (!url) return;
+        const wrap = document.getElementById('refImgWrap-' + stepKey);
+        const img = document.getElementById('refImg-' + stepKey);
+        if (wrap && img) {
+          img.src = url;
+          wrap.style.display = 'block';
+        }
+      });
+    } catch (err) {
+      // เงียบไว้ก่อน ถ้าโหลดรูปตัวอย่างไม่สำเร็จ ไม่ให้กระทบการใช้งานหลัก (บันทึกเวลาเข้า/ออกยังทำงานได้ปกติ)
+      console.error('โหลดรูปภาพตัวอย่างขั้นตอนไม่สำเร็จ', err);
+    }
+  }
+
+  // ---------- หน้า "คะแนนของฉัน" (4.1 กลุ่ม Iron Chef / 4.2 เดี่ยว / 4.3 รวม) ----------
+  let hasLoadedScoreSummaryOnce = false;
+  async function loadScoreSummary() {
+    const loadingEl = document.getElementById('scoreSummaryLoading');
+    const contentEl = document.getElementById('scoreSummaryContent');
+    if (!hasLoadedScoreSummaryOnce) {
+      loadingEl.style.display = 'block';
+      contentEl.style.display = 'none';
+    }
+    try {
+      const result = await callApi({ action: 'getScoreSummary', employeeId: currentUser.employeeId });
+      hasLoadedScoreSummaryOnce = true;
+      if (!result.ok) {
+        loadingEl.textContent = result.message || 'โหลดคะแนนไม่สำเร็จ';
+        return;
+      }
+      document.getElementById('myGroupDisplay').textContent = result.group || 'ยังไม่ได้กำหนดกลุ่ม';
+      document.getElementById('ironChefScoreDisplay').textContent = result.ironChefScore ? (result.ironChefScore + ' คะแนน') : 'ยังไม่มีคะแนน';
+
+      const breakdownEl = document.getElementById('individualScoreBreakdown');
+      if (result.individualBreakdown && result.individualBreakdown.length > 0) {
+        breakdownEl.innerHTML = result.individualBreakdown.map(b =>
+          '<div><b>' + escapeHtml(b.activityName) + ':</b> ' + escapeHtml(String(b.score)) + ' คะแนน</div>'
+        ).join('');
+      } else {
+        breakdownEl.textContent = 'ยังไม่มีคะแนน';
+      }
+      document.getElementById('individualScoreTotal').textContent = 'รวมคะแนนฐานกิจกรรม: ' + (result.individualTotal || 0);
+      document.getElementById('totalScoreDisplay').textContent = (result.total || 0) + ' คะแนน';
+
+      loadingEl.style.display = 'none';
+      contentEl.style.display = 'block';
+    } catch (err) {
+      if (!hasLoadedScoreSummaryOnce) loadingEl.textContent = 'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ';
+    }
+  }
+  window.loadScoreSummary = loadScoreSummary;
+
+  // ---------- หน้า "โหวตเครื่องแต่งกาย" ----------
+  let hasLoadedVoteOnce = false;
+  let selectedVoteEmployeeId = null;
+
+  async function loadVoteCandidates() {
+    if (hasLoadedVoteOnce) return; // โหลดครั้งเดียวพอ (โหวตได้ครั้งเดียวอยู่แล้ว)
+    const loadingEl = document.getElementById('voteLoading');
+    const lockedEl = document.getElementById('voteLockedMsg');
+    const listEl = document.getElementById('voteListContainer');
+    const btnEl = document.getElementById('submitVoteBtn');
+
+    try {
+      const result = await callApi({ action: 'getVoteCandidates', employeeId: currentUser.employeeId });
+      hasLoadedVoteOnce = true;
+      loadingEl.style.display = 'none';
+
+      if (!result.ok) {
+        document.getElementById('voteMsg').className = 'save-msg err';
+        document.getElementById('voteMsg').textContent = result.message || 'โหลดรายชื่อไม่สำเร็จ';
+        return;
+      }
+
+      if (result.hasVoted) {
+        lockedEl.style.display = 'block';
+        lockedEl.textContent = 'คุณโหวตไปแล้ว: ' + (result.votedForName || '-') + ' (โหวตได้เพียงครั้งเดียว)';
+        return;
+      }
+
+      const candidates = (result.candidates || []).filter(c => String(c.employeeId) !== String(currentUser.employeeId));
+      if (candidates.length === 0) {
+        listEl.style.display = 'block';
+        listEl.innerHTML = '<div class="save-msg">ไม่มีรายชื่อให้โหวต</div>';
+        return;
+      }
+
+      listEl.innerHTML = candidates.map(c => `
+        <label class="vote-row" data-employee-id="${escapeHtml(c.employeeId)}" onclick="selectVoteCandidate('${escapeHtml(c.employeeId)}', '${escapeHtml(c.fullName)}')">
+          ${c.photo ? '<img src="' + escapeHtml(c.photo) + '" alt="" />' : '<img alt="" />'}
+          <div>
+            <div class="vote-name">${escapeHtml(c.fullName)}</div>
+            <div class="vote-sub">${escapeHtml(c.nickname || '')}${c.group ? ' • กลุ่ม ' + escapeHtml(c.group) : ''}</div>
+          </div>
+          <input type="radio" name="voteChoice" value="${escapeHtml(c.employeeId)}" />
+        </label>
+      `).join('');
+      listEl.style.display = 'block';
+      btnEl.style.display = 'flex';
+    } catch (err) {
+      hasLoadedVoteOnce = false;
+      loadingEl.textContent = 'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ';
+    }
+  }
+  window.loadVoteCandidates = loadVoteCandidates;
+
+  function selectVoteCandidate(employeeId, fullName) {
+    selectedVoteEmployeeId = { employeeId: employeeId, fullName: fullName };
+    document.querySelectorAll('.vote-row').forEach(row => {
+      const isSelected = row.dataset.employeeId === employeeId;
+      row.classList.toggle('selected', isSelected);
+      const radio = row.querySelector('input[type="radio"]');
+      if (radio) radio.checked = isSelected;
+    });
+  }
+  window.selectVoteCandidate = selectVoteCandidate;
+
+  async function submitVote() {
+    const msgEl = document.getElementById('voteMsg');
+    if (!selectedVoteEmployeeId) {
+      msgEl.className = 'save-msg err';
+      msgEl.textContent = 'กรุณาเลือกคนที่จะโหวตก่อน';
+      return;
+    }
+    const btnEl = document.getElementById('submitVoteBtn');
+    btnEl.disabled = true;
+    msgEl.className = 'save-msg';
+    msgEl.textContent = 'กำลังบันทึกโหวต...';
+
+    try {
+      const result = await callApi({
+        action: 'submitVote',
+        voterEmployeeId: currentUser.employeeId,
+        voterName: currentUser.fullName,
+        votedForEmployeeId: selectedVoteEmployeeId.employeeId,
+        votedForName: selectedVoteEmployeeId.fullName
+      });
+      if (result.ok) {
+        msgEl.className = 'save-msg ok';
+        msgEl.textContent = result.message || 'บันทึกโหวตสำเร็จ';
+        document.getElementById('voteListContainer').style.display = 'none';
+        btnEl.style.display = 'none';
+        const lockedEl = document.getElementById('voteLockedMsg');
+        lockedEl.style.display = 'block';
+        lockedEl.textContent = 'คุณโหวตไปแล้ว: ' + selectedVoteEmployeeId.fullName + ' (โหวตได้เพียงครั้งเดียว)';
+      } else {
+        msgEl.className = 'save-msg err';
+        msgEl.textContent = result.message || 'บันทึกโหวตไม่สำเร็จ';
+        btnEl.disabled = false;
+      }
+    } catch (err) {
+      msgEl.className = 'save-msg err';
+      msgEl.textContent = 'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ';
+      btnEl.disabled = false;
+    }
+  }
+  window.submitVote = submitVote;
+
+  showProfile();          // แสดงข้อมูลส่วนตัวทันทีจากข้อมูล login ไม่ต้องรอเซิร์ฟเวอร์
+  loadActivities(false);  // โหลดสถานะกิจกรรมครั้งแรก
+  loadStepImages();       // โหลดรูปภาพตัวอย่างประจำขั้นตอนครั้งแรก
+
+  // ตรวจสถานะการอนุมัติซ้ำทุก 8 วินาที เพื่อให้เห็นผลอนุมัติแบบเรียลไทม์โดยไม่ต้อง refresh หน้า
+  setInterval(() => loadActivities(true), 8000);
+
+  // เมื่อผู้ใช้สลับกลับมาที่แท็บนี้ ให้ตรวจสถานะทันทีอีกครั้ง (เผื่อ interval ยังไม่ถึงรอบ)
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) loadActivities(true);
+  });
+</script>
+</body>
+</html>
