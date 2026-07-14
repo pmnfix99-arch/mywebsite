@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>อนุมัติกิจกรรม - Team Connect Passport</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    padding: 14px 14px 24px;
+    background: linear-gradient(135deg, #ffffff 0%, #f1f7ec 55%, #e3efd8 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans Thai", Tahoma, sans-serif;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+  }
+  button { font-family: inherit; }
+  .wrap { width: 100%; max-width: 420px; }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.8rem; }
+  .brand { font-size: 17px; font-weight: 700; color: #16233d; }
+  .brand .accent { color: #3f7a1f; }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: 50%; border: none; background: transparent;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    color: #5fae35; padding: 0;
+  }
+
+  h1 { font-size: 16px; text-align: center; color: #16233d; margin: 0 0 4px; }
+  .sub { font-size: 11.5px; text-align: center; color: #8a97ac; margin-bottom: 1rem; }
+
+  .filter-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+    font-size: 12.5px; color: #6f89ab;
+  }
+  .filter-row select {
+    flex: 1; height: 36px; border-radius: 10px; border: 1px solid #d4dbe6;
+    background: #ffffff; padding: 0 10px; font-size: 12.5px; color: #16233d;
+    font-family: inherit;
+  }
+  .refresh-row { display: flex; justify-content: flex-end; margin-bottom: 8px; }
+  .refresh-btn {
+    display: flex; align-items: center; gap: 5px; border: none; background: #ffffff;
+    border: 1px solid #d4dbe6; border-radius: 20px; padding: 6px 12px; font-size: 11.5px;
+    color: #3f7a1f; font-weight: 700; cursor: pointer;
+  }
+
+  .empty-state {
+    text-align: center; padding: 3rem 1rem; color: #8a97ac; font-size: 13px;
+  }
+
+  .approval-card {
+    background: #fdfdfe; border-radius: 18px; border: 1px solid #eceff4;
+    padding: 1rem 1.1rem; margin-bottom: 12px;
+    box-shadow: 0 8px 22px rgba(30,60,110,0.08), 0 2px 6px rgba(30,60,110,0.05);
+  }
+  .approval-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+  .approval-head .name { font-size: 14px; font-weight: 700; color: #16233d; }
+  .approval-head .activity { font-size: 12px; color: #3f7a1f; font-weight: 700; margin-top: 2px; }
+  .status-tag {
+    font-size: 10.5px; font-weight: 700; padding: 4px 10px; border-radius: 20px;
+    background: #fff6e0; color: #b8860b; white-space: nowrap;
+  }
+  .approval-detail { font-size: 12px; color: #6f89ab; margin-bottom: 10px; line-height: 1.6; }
+  .approval-photo { margin-bottom: 10px; }
+  .approval-photo img { width: 100%; max-height: 220px; object-fit: cover; border-radius: 10px; display: block; }
+  .approval-detail b { color: #16233d; }
+  .approval-actions { display: flex; gap: 8px; }
+  .btn-approve, .btn-reject {
+    flex: 1; height: 38px; border-radius: 10px; border: none; font-weight: 700; font-size: 12.5px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;
+  }
+  .btn-approve { background: #3f7a1f; color: #ffffff; }
+  .btn-reject { background: #ffffff; color: #c0392b; border: 1.5px solid #f0c4bd; }
+  .btn-approve:disabled, .btn-reject:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: #16233d; color: #ffffff; font-size: 12.5px; padding: 10px 18px;
+    border-radius: 20px; opacity: 0; transition: opacity 0.2s ease; pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
+
+  /* ---------- Tabs ---------- */
+  .tab-row-outer { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; margin-bottom: 12px; }
+  .tab-row-outer::-webkit-scrollbar { display: none; }
+  .tab-row { display: flex; background: #f1f4f9; border-radius: 12px; padding: 4px; width: max-content; min-width: 100%; }
+  .tab-btn {
+    flex: none; border: none; background: transparent; padding: 9px 12px; border-radius: 9px;
+    font-size: 12.5px; font-weight: 700; color: #6f89ab; cursor: pointer; white-space: nowrap;
+  }
+  .tab-btn.active { background: #3f7a1f; color: #ffffff; box-shadow: 0 3px 8px rgba(63,122,31,0.3); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ---------- ให้คะแนนเดี่ยว / กลุ่ม Iron Chef / ผลโหวต ---------- */
+  .score-card {
+    background: #fdfdfe; border-radius: 18px; border: 1px solid #eceff4;
+    padding: 1rem 1.1rem; margin-bottom: 12px;
+    box-shadow: 0 8px 22px rgba(30,60,110,0.08), 0 2px 6px rgba(30,60,110,0.05);
+  }
+  .score-card .name { font-size: 14px; font-weight: 700; color: #16233d; }
+  .score-card .activity { font-size: 12px; color: #3f7a1f; font-weight: 700; margin-top: 2px; margin-bottom: 10px; }
+  .score-row { display: flex; align-items: center; gap: 8px; }
+  .score-row input[type="number"] {
+    width: 70px; height: 38px; border-radius: 10px; border: 1px solid #d4dbe6;
+    padding: 0 10px; font-size: 14px; text-align: center; color: #16233d;
+  }
+  .score-row .score-hint { font-size: 11px; color: #8a97ac; }
+  .score-save-btn {
+    flex: none; height: 38px; padding: 0 16px; border-radius: 10px; border: none;
+    background: #3f7a1f; color: #ffffff; font-weight: 700; font-size: 12.5px; cursor: pointer;
+  }
+  .score-save-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .score-status { font-size: 11px; margin-top: 6px; min-height: 14px; }
+  .score-status.ok { color: #3f7a1f; }
+  .score-status.err { color: #c0392b; }
+  .group-badge {
+    display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px;
+    border-radius: 50%; background: #3f7a1f; color: #ffffff; font-weight: 700; font-size: 14px; margin-right: 8px;
+  }
+  .vote-result-row {
+    display: flex; align-items: center; justify-content: space-between; padding: 9px 12px;
+    border-radius: 10px; background: #f9fafb; margin-bottom: 6px; font-size: 13px; color: #16233d;
+  }
+  .vote-result-row .cnt { font-weight: 700; color: #3f7a1f; }
+
+  /* ---------- สรุปคะแนนกลุ่ม (เลือกผู้ชนะ A/B/C/D) ---------- */
+  .group-summary-card {
+    background: #fdfdfe; border-radius: 18px; border: 1px solid #eceff4;
+    padding: 1rem 1.1rem; margin-bottom: 12px;
+    box-shadow: 0 8px 22px rgba(30,60,110,0.08), 0 2px 6px rgba(30,60,110,0.05);
+  }
+  .group-summary-card.winner {
+    border: 1.5px solid #e3b341; background: linear-gradient(135deg, #fffdf5 0%, #fff8e6 100%);
+    box-shadow: 0 8px 22px rgba(227,179,65,0.22), 0 2px 6px rgba(227,179,65,0.14);
+  }
+  .group-summary-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .group-summary-head .name { font-size: 14px; font-weight: 700; color: #16233d; display: flex; align-items: center; }
+  .group-total { font-size: 16px; font-weight: 800; color: #3f7a1f; white-space: nowrap; }
+  .group-summary-sub { font-size: 11px; color: #8a97ac; margin-bottom: 10px; }
+  .member-list { border-top: 1px dashed #eceff4; padding-top: 8px; }
+  .member-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12.5px; color: #16233d; padding: 5px 0;
+  }
+  .member-row .member-score { font-size: 12px; color: #6f89ab; white-space: nowrap; }
+  .member-row .member-score b { color: #3f7a1f; }
+
+  /* ---------- Step image manager ---------- */
+  .step-img-card {
+    background: #fdfdfe; border-radius: 18px; border: 1px solid #eceff4;
+    padding: 1rem 1.1rem; margin-bottom: 12px;
+    box-shadow: 0 8px 22px rgba(30,60,110,0.08), 0 2px 6px rgba(30,60,110,0.05);
+  }
+  .step-img-card .step-title { font-size: 13.5px; font-weight: 700; color: #16233d; margin-bottom: 2px; }
+  .step-img-card .step-title .en { font-size: 10.5px; color: #8a97ac; font-weight: 400; margin-left: 4px; }
+  .step-img-preview {
+    width: 100%; height: 160px; border-radius: 12px; margin-top: 8px; margin-bottom: 8px;
+    border: 1.5px dashed #a9c0e0; background: #f4f7fc; overflow: hidden;
+    display: flex; align-items: center; justify-content: center; position: relative;
+  }
+  .step-img-preview img { display: none; width: 100%; height: 100%; object-fit: cover; }
+  .step-img-preview .empty-hint { font-size: 11.5px; color: #9aa7ba; text-align: center; padding: 0 10px; }
+  .step-img-upload-btn {
+    width: 100%; height: 38px; border-radius: 10px; border: 1.5px solid #3f7a1f;
+    background: #ffffff; color: #3f7a1f; font-weight: 700; font-size: 12.5px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .step-img-upload-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+  .step-img-status { font-size: 11px; text-align: center; margin-top: 6px; min-height: 14px; }
+  .step-img-status.ok { color: #3f7a1f; }
+  .step-img-status.err { color: #c0392b; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="brand">TEAM <span class="accent">CONNECT</span></div>
+    <button type="button" class="icon-btn" aria-label="ออกจากระบบ" onclick="logout()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><path d="M16 17l5-5l-5-5"></path><path d="M21 12H9"></path></svg>
+    </button>
+  </div>
+
+  <h1>✦ ผู้อนุมัติ ✦</h1>
+  <div class="sub" id="approverNameLabel">ผู้อนุมัติ</div>
+
+  <div class="tab-row-outer">
+    <div class="tab-row">
+      <button type="button" class="tab-btn active" id="tabApprovalsBtn" onclick="switchTab('approvals')">รออนุมัติ</button>
+      <button type="button" class="tab-btn" id="tabIronChefBtn" onclick="switchTab('ironChef')">Iron Chef กลุ่ม</button>
+      <button type="button" class="tab-btn" id="tabGroupSummaryBtn" onclick="switchTab('groupSummary')">สรุปกลุ่ม 🏆</button>
+      <button type="button" class="tab-btn" id="tabVoteResultsBtn" onclick="switchTab('voteResults')">ผลโหวตชุด</button>
+      <button type="button" class="tab-btn" id="tabStepImagesBtn" onclick="switchTab('stepImages')">รูปภาพขั้นตอน</button>
+    </div>
+  </div>
+
+  <div class="tab-panel active" id="tabPanelApprovals">
+    <div class="sub" style="margin-bottom: 0.9rem;">
+      ให้คะแนนพร้อมกับตอนกดอนุมัติได้เลยในการ์ดด้านล่าง (ไม่บังคับ)
+    </div>
+    <div class="filter-row">
+      <label for="stationFilter">กรองตามฐาน:</label>
+      <select id="stationFilter" onchange="onFilterChange()">
+        <option value="all">ทั้งหมด</option>
+        <option value="กิจกรรมเข้าฐาน - บันทึกเวลาของระบบมาตรฐาน">กิจกรรมเข้าฐาน - ระบบมาตรฐาน</option>
+        <option value="กิจกรรมเข้าฐาน - บันทึกเวลาความยั่งยืน">กิจกรรมเข้าฐาน - ความยั่งยืน</option>
+        <option value="กิจกรรมเข้าฐาน - บันทึกเวลา LAB กริ๊ง">กิจกรรมเข้าฐาน - LAB กริ๊ง</option>
+        <option value="Step 1 ขึ้นรูป">Step 1 ขึ้นรูป</option>
+        <option value="Step 2 ตัดขอบ">Step 2 ตัดขอบ</option>
+        <option value="Step 3 ตรวจสอบ">Step 3 ตรวจสอบ</option>
+        <option value="Step 4 แพ็คสินค้า">Step 4 แพ็คสินค้า</option>
+        <option value="บันทึกการเรียนรู้">บันทึกการเรียนรู้</option>
+        <option value="Iron Chef">Iron Chef</option>
+      </select>
+    </div>
+
+    <div class="refresh-row">
+      <button class="refresh-btn" onclick="loadPending()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"></path><path d="M20 5v6h-6"></path></svg>
+        รีเฟรช
+      </button>
+    </div>
+
+    <div id="listContainer">
+      <div class="empty-state">กำลังโหลดข้อมูล...</div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tabPanelStepImages">
+    <div class="sub" style="margin-bottom: 0.9rem;">
+      อัปโหลดรูป
+    </div>
+    <div id="stepImagesContainer">
+      <div class="empty-state">กำลังโหลดข้อมูล...</div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tabPanelIronChef">
+    <div class="sub" style="margin-bottom: 0.9rem;">
+      ให้คะแนนกลุ่ม Iron Chef (1-10) — ทุกคนในกลุ่มเดียวกันจะได้คะแนนเท่ากัน แก้ไขซ้ำได้ (เอาค่าล่าสุด)
+    </div>
+    <div id="ironChefContainer">
+      <div class="empty-state">กำลังโหลดข้อมูล...</div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tabPanelGroupSummary">
+    <div class="sub" style="margin-bottom: 0.9rem;">
+      คะแนนรวมของแต่ละกลุ่ม = คะแนนเดี่ยวรวมของสมาชิกทุกคน + คะแนนกลุ่ม Iron Chef ของกลุ่มนั้น เรียงจากคะแนนสูงสุดไปต่ำสุด
+    </div>
+    <div class="refresh-row">
+      <button class="refresh-btn" onclick="loadGroupSummary()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"></path><path d="M20 5v6h-6"></path></svg>
+        รีเฟรช
+      </button>
+    </div>
+    <div id="groupSummaryContainer">
+      <div class="empty-state">กำลังโหลดข้อมูล...</div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tabPanelVoteResults">
+    <div class="sub" style="margin-bottom: 0.9rem;">
+      ผลโหวตเครื่องแต่งกาย (เห็นได้เฉพาะผู้อนุมัติ)
+    </div>
+    <div class="refresh-row">
+      <button class="refresh-btn" onclick="loadVoteResults()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 1 0-2.3 5.7"></path><path d="M20 5v6h-6"></path></svg>
+        รีเฟรช
+      </button>
+    </div>
+    <div id="voteResultsContainer">
+      <div class="empty-state">กำลังโหลดข้อมูล...</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ตั้งค่า URL ของ Web App ที่ deploy จาก Code.gs
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyO96avgC5YUxykS-RTP_SfsTBxaaNkt8aH4x5-Zk5IqNhg39xw4CrjBAxdg0r2tNBzEQ/exec';
+
+  const currentUser = JSON.parse(localStorage.getItem('tcp_user') || 'null');
+  if (!currentUser || currentUser.role !== 'approver') {
+    window.location.href = 'login.html';
+  } else {
+    document.getElementById('approverNameLabel').textContent = 'ผู้อนุมัติ: ' + (currentUser.fullName || currentUser.employeeId);
+  }
+
+  function logout() {
+    localStorage.removeItem('tcp_user');
+    window.location.href = 'login.html';
+  }
+  window.logout = logout;
+
+  async function callApi(payload) {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    return res.json();
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  function escapeHtml(str) {
+    return String(str || '').replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  function cardHtml(act) {
+    // Iron Chef ให้คะแนนแบบกลุ่มในแท็บ "Iron Chef กลุ่ม" แยกต่างหาก เลยไม่ต้องมีช่องคะแนนในการ์ดอนุมัตินี้
+    const isIronChef = String(act.ActivityKey || '').trim() === 'iron_chef';
+    const scoreBlock = isIronChef ? '' : `
+        <div class="score-row" style="margin-bottom:10px;">
+          <input type="number" min="1" max="10" step="1" class="approval-score-input" id="scoreInput-${escapeHtml(act.ID)}" placeholder="คะแนน 1-10 (ถ้ามี)" />
+          <span class="score-hint">ให้คะแนนก่อนกดอนุมัติได้เลย (ไม่บังคับ)</span>
+        </div>`;
+    return `
+      <div class="approval-card" data-id="${escapeHtml(act.ID)}" data-employee-id="${escapeHtml(act.EmployeeID)}" data-activity-key="${escapeHtml(act.ActivityKey)}" data-activity-name="${escapeHtml(act.ActivityName)}" data-full-name="${escapeHtml(act.FullName)}">
+        <div class="approval-head">
+          <div>
+            <div class="name">${escapeHtml(act.FullName)}</div>
+            <div class="activity">${escapeHtml(act.ActivityName)}</div>
+          </div>
+          <div class="status-tag">รออนุมัติ</div>
+        </div>
+        <div class="approval-detail">
+          ${act.TimeIn ? '<b>วันที่:</b> ' + escapeHtml(act.Date || 'ไม่มีข้อมูลวันที่ (รายการเก่า)') + '&nbsp;&nbsp;<b>เวลาเข้า:</b> ' + escapeHtml(act.TimeIn) + '&nbsp;&nbsp;<b>เวลาออก:</b> ' + escapeHtml(act.TimeOut) : ''}
+          ${act.Remark ? '<br><b>บันทึก:</b> ' + escapeHtml(act.Remark) : ''}
+        </div>
+        ${act.PhotoUrl ? '<div class="approval-photo"><img src="' + escapeHtml(act.PhotoUrl) + '" alt="รูปแนบ" /></div>' : ''}
+        ${scoreBlock}
+        <div class="approval-actions">
+          <button class="btn-approve" onclick="decide('${escapeHtml(act.ID)}', 'approve')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+            อนุมัติ
+          </button>
+          <button class="btn-reject" onclick="decide('${escapeHtml(act.ID)}', 'reject')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg>
+            ไม่อนุมัติ
+          </button>
+        </div>
+        <div class="score-status" id="scoreStatus-${escapeHtml(act.ID)}"></div>
+      </div>
+    `.trim();
+  }
+
+  let hasLoadedOnce = false;
+  let allPendingActivities = []; // เก็บรายการเต็มที่ดึงมาล่าสุด ไว้กรองตามฐานที่เลือกโดยไม่ต้องยิง API ใหม่
+  let currentFilter = 'all';
+
+  function onFilterChange() {
+    currentFilter = document.getElementById('stationFilter').value;
+    renderFilteredList();
+  }
+  window.onFilterChange = onFilterChange;
+
+  function renderFilteredList() {
+    const filtered = currentFilter === 'all'
+      ? allPendingActivities
+      : allPendingActivities.filter(a => a.ActivityName === currentFilter);
+    reconcileList(filtered);
+  }
+
+  async function loadPending() {
+    const container = document.getElementById('listContainer');
+    const isBackgroundPoll = hasLoadedOnce;
+
+    // แสดง "กำลังโหลด..." เฉพาะตอนโหลดครั้งแรกเท่านั้น ไม่ใช่ทุกครั้งที่ poll พื้นหลัง
+    if (!isBackgroundPoll) {
+      container.innerHTML = '<div class="empty-state">กำลังโหลดข้อมูล...</div>';
+    }
+
+    try {
+      const result = await callApi({ action: 'getPendingApprovals' });
+      if (!result.ok) {
+        if (!isBackgroundPoll) container.innerHTML = '<div class="empty-state">โหลดข้อมูลไม่สำเร็จ</div>';
+        return; // อย่าล้มการแสดงผลเดิมถ้าเป็นแค่ poll พื้นหลังที่พลาด
+      }
+      hasLoadedOnce = true;
+      allPendingActivities = result.activities || [];
+      renderFilteredList();
+    } catch (err) {
+      if (!isBackgroundPoll) container.innerHTML = '<div class="empty-state">เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ</div>';
+      // poll พื้นหลังพลาด: เงียบไว้ก่อน ปล่อยให้รอบถัดไปลองใหม่ ไม่รบกวนรายการที่แสดงอยู่
+    }
+  }
+
+  // อัปเดตเฉพาะส่วนที่เปลี่ยนจริง (เพิ่มรายการใหม่ / เอารายการที่ถูกอนุมัติ-ปฏิเสธไปแล้วออก)
+  // แทนที่จะล้าง innerHTML ทั้งก้อนแล้ววาดใหม่ทุกครั้ง เพื่อไม่ให้จอกระพริบ/เสียตำแหน่งสกอลล์
+  function reconcileList(activities) {
+    const container = document.getElementById('listContainer');
+    const incomingIds = new Set(activities.map(a => String(a.ID)));
+    const existingCards = Array.from(container.querySelectorAll('.approval-card'));
+    const existingIds = new Set(existingCards.map(c => c.dataset.id));
+
+    if (activities.length === 0) {
+      if (existingCards.length > 0 || container.querySelector('.empty-state') === null) {
+        container.innerHTML = '<div class="empty-state">ไม่มีรายการรออนุมัติในขณะนี้ 🎉</div>';
+      }
+      return;
+    }
+
+    // เอา empty-state ออกถ้ามีอยู่ ก่อนจะเริ่มเติมการ์ด
+    const emptyState = container.querySelector('.empty-state');
+    if (emptyState) emptyState.remove();
+
+    // ลบการ์ดที่ไม่อยู่ในรายการล่าสุดแล้ว (ถูกอนุมัติ/ปฏิเสธไปโดยคนอื่น หรือโดยตัวเราเองจากแท็บอื่น)
+    existingCards.forEach(card => {
+      if (!incomingIds.has(card.dataset.id)) card.remove();
+    });
+
+    // เติมการ์ดใหม่ที่ยังไม่เคยแสดง (การ์ดเดิมที่ยังอยู่จะไม่ถูกแตะต้องเลย)
+    activities.forEach(act => {
+      const id = String(act.ID);
+      if (existingIds.has(id)) return; // มีอยู่แล้ว ไม่ต้องวาดซ้ำ
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = cardHtml(act);
+      container.appendChild(wrapper.firstElementChild);
+    });
+  }
+
+  async function decide(id, action) {
+    const card = document.querySelector('.approval-card[data-id="' + id + '"]');
+    if (!card) return;
+
+    // ถ้ากดอนุมัติและมีช่องคะแนนอยู่ในการ์ด (ไม่ใช่ Iron Chef) ให้ตรวจสอบคะแนนก่อน
+    // กรอกไว้ก็ส่งไปพร้อมกับคำขออนุมัติเลย ไม่ต้องไปกดบันทึกคะแนนแยกทีหลัง ถ้าไม่กรอกไว้ก็อนุมัติได้ตามปกติ
+    let score = '';
+    const scoreInput = card.querySelector('.approval-score-input');
+    if (action === 'approve' && scoreInput && scoreInput.value.trim() !== '') {
+      const n = Number(scoreInput.value);
+      if (!n || n < 1 || n > 10 || Math.round(n) !== n) {
+        const statusEl = document.getElementById('scoreStatus-' + id);
+        if (statusEl) { statusEl.className = 'score-status err'; statusEl.textContent = 'กรุณาใส่คะแนนระหว่าง 1-10 หรือเว้นว่างไว้ถ้ายังไม่ให้คะแนน'; }
+        scoreInput.focus();
+        return;
+      }
+      score = n;
+    }
+
+    card.querySelectorAll('button, input').forEach(b => b.disabled = true);
+
+    // Optimistic UI: เอาการ์ดออกจากหน้าจอทันทีที่กด ไม่ต้องรอ server ตอบกลับ
+    // เก็บตำแหน่งเดิมไว้ เผื่อต้องเอากลับมาแสดงถ้า server ปฏิเสธ/เชื่อมต่อไม่สำเร็จ
+    const container = document.getElementById('listContainer');
+    const parent = card.parentElement;
+    const nextSibling = card.nextElementSibling;
+    card.remove();
+    if (!container.querySelector('.approval-card')) {
+      container.innerHTML = '<div class="empty-state">ไม่มีรายการรออนุมัติในขณะนี้ 🎉</div>';
+    }
+
+    // เอาออกจากรายการเต็มที่เก็บไว้ด้วย เผื่อผู้ใช้สลับตัวกรองฐานระหว่างรอ server ตอบกลับ
+    const removedIndex = allPendingActivities.findIndex(a => String(a.ID) === String(id));
+    const removedAct = removedIndex !== -1 ? allPendingActivities.splice(removedIndex, 1)[0] : null;
+
+    const payload = {
+      action: action === 'approve' ? 'approveActivity' : 'rejectActivity',
+      id: id,
+      approverName: currentUser.fullName || currentUser.employeeId
+    };
+    if (action === 'approve' && score !== '') {
+      payload.score = score;
+      payload.employeeId = card.dataset.employeeId;
+      payload.fullName = card.dataset.fullName;
+      payload.activityKey = card.dataset.activityKey;
+      payload.activityName = card.dataset.activityName;
+    }
+
+    try {
+      const result = await callApi(payload);
+      if (result.ok) {
+        showToast(result.message || 'บันทึกผลการอนุมัติแล้ว');
+      } else {
+        // server ปฏิเสธ (เช่นมีคนอื่นอนุมัติไปก่อนแล้ว) -> โหลดรายการจริงใหม่ทั้งหมดให้ตรงกับความจริง
+        showToast(result.message || 'ดำเนินการไม่สำเร็จ');
+        loadPending();
+      }
+    } catch (err) {
+      // เชื่อมต่อไม่สำเร็จ -> เอาการ์ดกลับมาแสดงที่เดิม แล้วให้กดใหม่ได้
+      showToast('เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ');
+      if (removedAct && removedIndex !== -1) allPendingActivities.splice(removedIndex, 0, removedAct);
+      const emptyState = container.querySelector('.empty-state');
+      if (emptyState) emptyState.remove();
+      card.querySelectorAll('button').forEach(b => b.disabled = false);
+      if (nextSibling && nextSibling.parentElement === parent) {
+        parent.insertBefore(card, nextSibling);
+      } else if (parent) {
+        parent.appendChild(card);
+      }
+    }
+  }
+  window.decide = decide;
+
+  // ---------- แท็บ ----------
+  const ALL_TABS = ['approvals', 'ironChef', 'groupSummary', 'voteResults', 'stepImages'];
+  function switchTab(tab) {
+    ALL_TABS.forEach(t => {
+      const btnId = 'tab' + t.charAt(0).toUpperCase() + t.slice(1) + 'Btn';
+      const panelId = 'tabPanel' + t.charAt(0).toUpperCase() + t.slice(1);
+      const btn = document.getElementById(btnId);
+      const panel = document.getElementById(panelId);
+      if (btn) btn.classList.toggle('active', tab === t);
+      if (panel) panel.classList.toggle('active', tab === t);
+    });
+    if (tab === 'stepImages' && !hasLoadedStepImagesOnce) loadStepImages();
+    if (tab === 'ironChef' && !hasLoadedIronChefOnce) loadIronChefScores();
+    if (tab === 'groupSummary') loadGroupSummary();
+    if (tab === 'voteResults') loadVoteResults();
+  }
+  window.switchTab = switchTab;
+
+  // ---------- รูปภาพตัวอย่างประจำขั้นตอน (2-6) ----------
+  // stepKey ต้องตรงกับ data-activity-key ในหน้า user.html เป๊ะๆ
+  const STEP_IMAGE_DEFS = [
+    { key: 'step1_ขึ้นรูป',   title: 'Step 1 ขึ้นรูป',   en: 'Forming' },
+    { key: 'step2_ตัดขอบ',   title: 'Step 2 ตัดขอบ',   en: 'Cutting' },
+    { key: 'step3_ตรวจสอบ',  title: 'Step 3 ตรวจสอบ',  en: 'Appearance' },
+    { key: 'step4_แพ็คสินค้า', title: 'Step 4 แพ็คสินค้า', en: 'Packing' }
+  ];
+
+  let hasLoadedStepImagesOnce = false;
+  let stepImagePendingBase64 = {}; // { stepKey: base64 } เก็บรูปที่เลือกไว้ระหว่างรออัปโหลด
+
+  function stepImgCardHtml(def) {
+    return `
+      <div class="step-img-card" data-step-key="${escapeHtml(def.key)}">
+        <div class="step-title">${escapeHtml(def.title)}<span class="en">${escapeHtml(def.en)}</span></div>
+        <input type="file" id="stepImgInput-${escapeHtml(def.key)}" accept="image/*" style="display:none;" onchange="onStepImageSelected('${escapeHtml(def.key)}', this)" />
+        <div class="step-img-preview" id="stepImgPreview-${escapeHtml(def.key)}" onclick="document.getElementById('stepImgInput-${escapeHtml(def.key)}').click()">
+          <img id="stepImgTag-${escapeHtml(def.key)}" alt="ตัวอย่าง ${escapeHtml(def.title)}" />
+          <div class="empty-hint" id="stepImgEmptyHint-${escapeHtml(def.key)}">ยังไม่มีรูปภาพ<br>แตะเพื่อเลือกรูป</div>
+        </div>
+        <button type="button" class="step-img-upload-btn" id="stepImgBtn-${escapeHtml(def.key)}" onclick="document.getElementById('stepImgInput-${escapeHtml(def.key)}').click()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="M21 15l-5-5L5 21"></path></svg>
+          เลือกรูป / เปลี่ยนรูป
+        </button>
+        <div class="step-img-status" id="stepImgStatus-${escapeHtml(def.key)}"></div>
+      </div>
+    `.trim();
+  }
+
+  async function loadStepImages() {
+    const container = document.getElementById('stepImagesContainer');
+    container.innerHTML = STEP_IMAGE_DEFS.map(stepImgCardHtml).join('');
+
+    try {
+      const result = await callApi({ action: 'getStepImages' });
+      hasLoadedStepImagesOnce = true;
+      if (!result.ok) return;
+      const images = result.images || {};
+      STEP_IMAGE_DEFS.forEach(def => {
+        const url = images[def.key];
+        if (url) {
+          const img = document.getElementById('stepImgTag-' + def.key);
+          const hint = document.getElementById('stepImgEmptyHint-' + def.key);
+          if (img) { img.src = url; img.style.display = 'block'; }
+          if (hint) hint.style.display = 'none';
+        }
+      });
+    } catch (err) {
+      hasLoadedStepImagesOnce = true;
+      // เงียบไว้ก่อน การ์ดยังแสดงอยู่แค่ไม่มีรูป ให้ผู้อนุมัติอัปโหลดใหม่ได้ตามปกติ
+    }
+  }
+  window.loadStepImages = loadStepImages;
+
+  function onStepImageSelected(stepKey, inputEl) {
+    const file = inputEl.files && inputEl.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      // ตัดส่วนหัว "data:image/...;base64," ออก เหลือแค่ตัว base64 ล้วนๆ ก่อนส่งขึ้น server
+      const base64 = String(reader.result).split(',')[1];
+      stepImagePendingBase64[stepKey] = base64;
+
+      // แสดงตัวอย่างรูปทันทีที่เลือก (ยังไม่ได้อัปโหลดจริง)
+      const img = document.getElementById('stepImgTag-' + stepKey);
+      const hint = document.getElementById('stepImgEmptyHint-' + stepKey);
+      if (img) { img.src = reader.result; img.style.display = 'block'; }
+      if (hint) hint.style.display = 'none';
+
+      uploadStepImage(stepKey, file.type || 'image/jpeg');
+    };
+    reader.readAsDataURL(file);
+  }
+  window.onStepImageSelected = onStepImageSelected;
+
+  async function uploadStepImage(stepKey, mimeType) {
+    const base64 = stepImagePendingBase64[stepKey];
+    if (!base64) return;
+
+    const btn = document.getElementById('stepImgBtn-' + stepKey);
+    const statusEl = document.getElementById('stepImgStatus-' + stepKey);
+    if (btn) btn.disabled = true;
+    if (statusEl) { statusEl.className = 'step-img-status'; statusEl.textContent = 'กำลังอัปโหลด...'; }
+
+    try {
+      const result = await callApi({
+        action: 'updateStepImage',
+        stepKey: stepKey,
+        imageBase64: base64,
+        mimeType: mimeType,
+        filename: 'step_' + stepKey + '_' + new Date().getTime() + '.jpg',
+        updatedBy: currentUser.fullName || currentUser.employeeId
+      });
+
+      if (result.ok) {
+        delete stepImagePendingBase64[stepKey];
+        if (statusEl) { statusEl.className = 'step-img-status ok'; statusEl.textContent = 'อัปเดตรูปสำเร็จ ผู้ใช้ทุกคนจะเห็นรูปนี้ทันที'; }
+        showToast('อัปเดตรูปภาพขั้นตอนสำเร็จ');
+      } else {
+        if (statusEl) { statusEl.className = 'step-img-status err'; statusEl.textContent = result.message || 'อัปโหลดไม่สำเร็จ'; }
+      }
+    } catch (err) {
+      if (statusEl) { statusEl.className = 'step-img-status err'; statusEl.textContent = 'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ'; }
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  // ---------- แท็บ "Iron Chef กลุ่ม" ----------
+  let hasLoadedIronChefOnce = false;
+  let GROUP_LIST = []; // โหลดจริงจาก Google Sheet (คอลัมน์ Group ในชีต Users) แทนการ hardcode A/B/C/D
+
+  async function loadIronChefScores() {
+    const container = document.getElementById('ironChefContainer');
+    container.innerHTML = '<div class="empty-state">กำลังโหลดข้อมูล...</div>';
+
+    try {
+      const result = await callApi({ action: 'getGroupScores' });
+      hasLoadedIronChefOnce = true;
+      if (!result.ok) {
+        container.innerHTML = '<div class="empty-state">โหลดข้อมูลไม่สำเร็จ</div>';
+        return;
+      }
+
+      GROUP_LIST = result.groupList || Object.keys(result.groups || {});
+      if (GROUP_LIST.length === 0) {
+        container.innerHTML = '<div class="empty-state">ยังไม่พบกลุ่มใดในชีต Users (ตรวจสอบคอลัมน์ Group)</div>';
+        return;
+      }
+
+      container.innerHTML = GROUP_LIST.map(g => `
+        <div class="score-card" data-group="${escapeHtml(g)}">
+          <div class="name"><span class="group-badge"></span>กลุ่ม ${escapeHtml(g)}</div>
+          <div class="score-row" style="margin-top:10px;">
+            <input type="number" min="1" max="10" step="1" id="groupScoreInput-${escapeHtml(g)}" placeholder="1-10" />
+            <span class="score-hint">คะแนน 1-10</span>
+            <button class="score-save-btn" onclick="saveGroupScore('${escapeHtml(g)}')">บันทึก</button>
+          </div>
+          <div class="score-status" id="groupScoreStatus-${escapeHtml(g)}"></div>
+        </div>
+      `).join('');
+
+      GROUP_LIST.forEach(g => {
+        const info = result.groups && result.groups[g];
+        if (info && info.score !== '' && info.score !== undefined) {
+          const input = document.getElementById('groupScoreInput-' + g);
+          if (input) input.value = info.score;
+        }
+      });
+    } catch (err) {
+      hasLoadedIronChefOnce = true;
+      container.innerHTML = '<div class="empty-state">เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ</div>';
+    }
+  }
+  window.loadIronChefScores = loadIronChefScores;
+
+  async function saveGroupScore(group) {
+    const input = document.getElementById('groupScoreInput-' + group);
+    const statusEl = document.getElementById('groupScoreStatus-' + group);
+    const score = Number(input.value);
+    if (!score || score < 1 || score > 10) {
+      statusEl.className = 'score-status err';
+      statusEl.textContent = 'กรุณาใส่คะแนนระหว่าง 1-10';
+      return;
+    }
+    statusEl.className = 'score-status';
+    statusEl.textContent = 'กำลังบันทึก...';
+    try {
+      const result = await callApi({
+        action: 'saveGroupScore', group: group, score: score,
+        approverName: currentUser.fullName || currentUser.employeeId
+      });
+      statusEl.className = result.ok ? 'score-status ok' : 'score-status err';
+      statusEl.textContent = result.message || (result.ok ? 'บันทึกแล้ว' : 'บันทึกไม่สำเร็จ');
+      if (result.ok) showToast('บันทึกคะแนนกลุ่ม ' + group + ' สำเร็จ');
+    } catch (err) {
+      statusEl.className = 'score-status err';
+      statusEl.textContent = 'เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ';
+    }
+  }
+  window.saveGroupScore = saveGroupScore;
+
+  // ---------- แท็บ "สรุปกลุ่ม" (รวมคะแนนเดี่ยวของสมาชิก + คะแนนกลุ่ม Iron Chef เพื่อเลือกผู้ชนะ) ----------
+  async function loadGroupSummary() {
+    const container = document.getElementById('groupSummaryContainer');
+    container.innerHTML = '<div class="empty-state">กำลังโหลดข้อมูล...</div>';
+    try {
+      const result = await callApi({ action: 'getGroupSummary' });
+      if (!result.ok) {
+        container.innerHTML = '<div class="empty-state">โหลดข้อมูลไม่สำเร็จ</div>';
+        return;
+      }
+      const ranking = result.ranking || [];
+      const groups = result.groups || {};
+      if (ranking.length === 0) {
+        container.innerHTML = '<div class="empty-state">ยังไม่มีข้อมูลกลุ่ม (ตรวจสอบคอลัมน์ Group ในชีต Users)</div>';
+        return;
+      }
+
+      container.innerHTML = ranking.map((r, idx) => {
+        const info = groups[r.group] || { members: [], groupScore: '' };
+        const groupScoreDisplay = info.groupScore === '' ? 'ยังไม่ให้คะแนน' : escapeHtml(String(info.groupScore));
+        const medal = idx === 0 ? '🏆 ' : idx === 1 ? '🥈 ' : idx === 2 ? '🥉 ' : '';
+        const membersHtml = info.members.length
+          ? info.members.map(m => `
+              <div class="member-row">
+                <span>${escapeHtml(m.fullName)}</span>
+                <span class="member-score">${escapeHtml(String(m.individualTotal))} + ${escapeHtml(String(info.groupScore === '' ? 0 : info.groupScore))} = <b>${escapeHtml(String(m.personalTotal))}</b></span>
+              </div>
+            `).join('')
+          : '<div class="member-row" style="color:#8a97ac;">ยังไม่มีสมาชิกในกลุ่มนี้</div>';
+
+        return `
+          <div class="group-summary-card ${idx === 0 && r.groupTotal > 0 ? 'winner' : ''}">
+            <div class="group-summary-head">
+              <div class="name"><span class="group-badge"></span>${medal}กลุ่ม ${escapeHtml(r.group)}</div>
+              <div class="group-total">${escapeHtml(String(r.groupTotal))} คะแนน</div>
+            </div>
+            <div class="group-summary-sub">คะแนนกลุ่ม Iron Chef: ${groupScoreDisplay} &nbsp;•&nbsp; สมาชิก ${r.memberCount} คน</div>
+            <div class="member-list">${membersHtml}</div>
+          </div>
+        `;
+      }).join('');
+    } catch (err) {
+      container.innerHTML = '<div class="empty-state">เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ</div>';
+    }
+  }
+  window.loadGroupSummary = loadGroupSummary;
+
+  // ---------- แท็บ "ผลโหวตชุด" ----------
+  async function loadVoteResults() {
+    const container = document.getElementById('voteResultsContainer');
+    container.innerHTML = '<div class="empty-state">กำลังโหลดข้อมูล...</div>';
+    try {
+      const result = await callApi({ action: 'getVoteResults' });
+      if (!result.ok) {
+        container.innerHTML = '<div class="empty-state">โหลดข้อมูลไม่สำเร็จ</div>';
+        return;
+      }
+      const results = result.results || [];
+      if (results.length === 0) {
+        container.innerHTML = '<div class="empty-state">ยังไม่มีใครโหวต</div>';
+        return;
+      }
+      container.innerHTML =
+        '<div class="sub" style="margin-bottom:8px;">โหวตทั้งหมด ' + (result.totalVotes || 0) + ' เสียง</div>' +
+        results.map(r => `
+          <div class="vote-result-row">
+            <span>${escapeHtml(r.fullName)}</span>
+            <span class="cnt">${escapeHtml(String(r.count))} โหวต</span>
+          </div>
+        `).join('');
+    } catch (err) {
+      container.innerHTML = '<div class="empty-state">เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ</div>';
+    }
+  }
+  window.loadVoteResults = loadVoteResults;
+
+  loadPending();
+
+  // ตรวจรายการรออนุมัติใหม่ทุก 8 วินาทีโดยอัตโนมัติ ไม่ต้องกดรีเฟรชเอง
+  setInterval(loadPending, 8000);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) loadPending();
+  });
+</script>
+</body>
+</html>
