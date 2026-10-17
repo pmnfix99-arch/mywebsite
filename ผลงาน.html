@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ผลงาน</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--background:#ffffff;--foreground:#09090b;--muted:#f4f4f5;--muted-foreground:#71717a;--border:#e4e4e7;--primary:#18181b;--primary-foreground:#fafafa;--radius:10px}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans Thai",system-ui,sans-serif;background:var(--background);color:var(--foreground);-webkit-font-smoothing:antialiased}
+button{font:inherit}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 20px 72px}
+
+/* Hero band */
+.hero{position:relative;overflow:hidden;height:560px;border:1px solid var(--border);border-radius:var(--radius);background:var(--background);container-type:size}
+@media (max-width:640px){.hero{height:460px}}
+.band{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .5s}
+.tile{position:absolute}
+.strip{position:absolute;top:0;overflow:hidden;background:var(--muted)}
+.strip.first{border-radius:10px 0 0 10px}
+.strip.last{border-radius:0 10px 10px 0}
+.strip img{position:absolute;top:0;max-width:none;object-fit:cover;user-select:none;-webkit-user-drag:none}
+.hero-content{position:relative;z-index:10;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:48px 0;text-align:center}
+.hero-content h1{margin:0 24px;font-size:clamp(28px,5vw,48px);font-weight:600;letter-spacing:-.02em;line-height:1.25;text-wrap:balance}
+.hero-content .sub{display:flex;flex-direction:column;align-items:center;gap:12px}
+.hero-content p{max-width:460px;margin:0;padding:0 24px;font-size:14px;color:var(--muted-foreground);text-wrap:balance}
+.stat{font-size:13px;background:var(--background);border:1px solid var(--border);border-radius:999px;padding:4px 12px;color:var(--muted-foreground)}
+
+/* List */
+.section-head{margin:48px 0 16px}
+.section-head h2{margin:0;font-size:22px;font-weight:600}
+.section-head p{margin:4px 0 0;font-size:14px;color:var(--muted-foreground)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:13px;color:var(--foreground)}
+.chip span{color:var(--muted-foreground);margin-left:4px}
+.chip.on{background:var(--primary);color:var(--primary-foreground);border-color:var(--primary)}
+.chip.on span{color:#a1a1aa}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+.work{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:#fff;display:flex;flex-direction:column;cursor:pointer;text-align:left;padding:0;transition:border-color .2s}
+.work:hover{border-color:#a1a1aa}
+.work:focus-visible{outline:2px solid var(--foreground);outline-offset:2px}
+.cover{position:relative;aspect-ratio:4/3;background:var(--muted)}
+.cover img{width:100%;height:100%;object-fit:cover;display:block}
+.cover .ph{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted-foreground);font-size:13px}
+.cover .count{position:absolute;right:8px;bottom:8px;font-size:12px;background:rgba(9,9,11,.75);color:#fff;border-radius:999px;padding:2px 8px}
+.body{padding:14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.badge{align-self:flex-start;font-size:12px;padding:2px 9px;border-radius:999px;background:var(--muted);border:1px solid var(--border)}
+.body h3{margin:2px 0 0;font-size:16px;font-weight:600;line-height:1.4}
+.date{font-size:12px;color:var(--muted-foreground)}
+.desc{margin:0;font-size:14px;line-height:1.6;color:var(--muted-foreground);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
+.empty{grid-column:1/-1;text-align:center;padding:48px 16px;color:var(--muted-foreground);border:1px dashed var(--border);border-radius:var(--radius)}
+
+/* Viewer */
+.viewer{position:fixed;inset:0;background:rgba(9,9,11,.85);display:none;align-items:center;justify-content:center;padding:20px;z-index:100}
+.viewer.open{display:flex}
+.panel{background:#fff;border-radius:var(--radius);max-width:860px;width:100%;max-height:90vh;overflow:auto;position:relative}
+.panel .main{width:100%;aspect-ratio:16/10;background:var(--muted);object-fit:contain;display:block}
+.panel .inner{padding:20px}
+.panel h2{margin:8px 0 4px;font-size:22px;font-weight:600}
+.panel .meta{font-size:13px;color:var(--muted-foreground);margin-bottom:12px}
+.panel .full{white-space:pre-line;line-height:1.7;font-size:15px;margin:0}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-top:16px}
+.thumbs img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;cursor:pointer;border:2px solid transparent;display:block}
+.thumbs img.on{border-color:var(--foreground)}
+.close{position:absolute;top:12px;right:12px;width:36px;height:36px;border-radius:50%;border:0;background:rgba(9,9,11,.75);color:#fff;font-size:20px;cursor:pointer;z-index:2}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section id="hero" class="hero">
+    <div id="band" class="band" aria-hidden="true"></div>
+    <div class="hero-content">
+      <h1>ผลงานของเรา</h1>
+      <div class="sub">
+        <p>ผลงานคัดสรรไหลวนผ่านแนวโค้งนี้ เลือกดูรายละเอียดได้จากรายการด้านล่าง</p>
+        <span class="stat" id="heroStat"></span>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-head">
+    <h2>รายการผลงาน</h2>
+    <p id="listStat"></p>
+  </div>
+  <div id="chips" class="chips"></div>
+  <div id="grid" class="grid"></div>
+
+</div>
+
+<div id="viewer" class="viewer" role="dialog" aria-modal="true">
+  <div class="panel">
+    <button class="close" id="closeBtn" aria-label="ปิด">×</button>
+    <img id="vMain" class="main" alt="">
+    <div class="inner">
+      <span class="badge" id="vCat"></span>
+      <h2 id="vTitle"></h2>
+      <div class="meta" id="vDate"></div>
+      <p class="full" id="vDesc"></p>
+      <div class="thumbs" id="vThumbs"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const CATS = ["ออกแบบ", "ถ่ายภาพ", "เว็บไซต์", "ภาพประกอบ", "อื่นๆ"];
+const KEY = "work-log-v1";
+const CDN = "https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev";
+const DEMO = [
+  `${CDN}/stock-images/767d99bb371a54d0d36751e8cecae43c.jpg`,
+  `${CDN}/gradients/hero_gradient/hero-gradients-01.png`,
+  `${CDN}/stock-images/821d815affa6496c39cbdeeec7a84603.jpg`,
+  `${CDN}/gradients/moon/moon-grade-03.png`,
+  `${CDN}/stock-images/937438c560ada1c83317f2c11b3454b0.jpg`,
+  `${CDN}/gradients/shade_shiters/shade-shifters-05.png`,
+  `${CDN}/stock-images/98f89cb9994f5c382ab964062c4039db.jpg`,
+  `${CDN}/gradients/shade_shiters/shade-shifters-09.png`,
+  `${CDN}/stock-images/ddcbee38be8b7274e19e132d7ab35b53.jpg`,
+  `${CDN}/gradients/moon/moon-grade-06.png`,
+].map(src => ({ src }));
+
+/* Tilted grid band */
+const SLICES = 16, CAMERA = 1.6, MAX_WIDTH = 55;
+const TILE = 26, ASPECT = 16 / 9, GAP = 6, AXIS = 56, CURVE = 80, FADE = 12, SPEED = 4;
+const arc = b => (CAMERA - 1 + Math.cos(b)) / (2 * CAMERA * Math.sin(b));
+
+function measure(width, height, tile, aspect, gap, bend) {
+  const h = Math.min((tile / 100) * height, ((MAX_WIDTH / 100) * width) / aspect);
+  const radius = width * arc(bend);
+  if (!(h > 0) || !(radius > 0)) return { columns: 2, sweep: 0, unit: 0, limit: 0 };
+  const deg = r => (r * 180) / Math.PI;
+  const unit = deg(h / radius);
+  const pitch = (aspect + gap / 100) * unit;
+  const limit = deg(bend) + (aspect * unit) / 2;
+  const columns = Math.min(60, Math.max(2, Math.ceil((2 * limit) / pitch)));
+  const round = n => +n.toFixed(4);
+  const sweep = round((columns * pitch) / 2);
+  return { columns, sweep, unit: round(unit), limit: round(Math.min(sweep, limit)) };
+}
+
+let HERO_IMAGES = [];
+let bandKey = "";
+
+function buildBand(force) {
+  const hero = document.getElementById("hero");
+  const band = document.getElementById("band");
+  const bend = (Math.min(85, Math.max(5, CURVE)) * Math.PI) / 180;
+  const m = measure(hero.clientWidth, hero.clientHeight, TILE, ASPECT, GAP, bend);
+  const key = [m.columns, m.sweep, m.unit].join("|");
+  if (!force && key === bandKey) return;
+  bandKey = key;
+
+  const { columns, sweep, unit, limit } = m;
+  const duration = columns * SPEED;
+  const orbit = "tgh-orbit";
+  const u = n => `calc(${+n.toFixed(4)} * min(${TILE}cqh, ${+(MAX_WIDTH / ASPECT).toFixed(4)}cqw))`;
+  const r = 100 * arc(bend);
+  const radius = `${r.toFixed(3)}cqw`;
+  const turn = d => `translateZ(${radius}) rotateY(${+d.toFixed(4)}deg) translateZ(-${radius})`;
+  const hide = +(((sweep - limit) / (2 * sweep || 1)) * 100).toFixed(4);
+  document.getElementById("band-style").textContent =
+    `@keyframes ${orbit}{from{transform:${turn(-sweep)}}to{transform:${turn(sweep)}}` +
+    `0%,${hide}%,${100 - hide}%,100%{visibility:hidden}` +
+    `${(hide + 0.001).toFixed(4)}%,${(100 - hide - 0.001).toFixed(4)}%{visibility:visible}}` +
+    `@media (prefers-reduced-motion:reduce){.tile{animation-play-state:paused}}`;
+
+  band.innerHTML = "";
+  band.style.perspective = `${(r * CAMERA).toFixed(3)}cqw`;
+  band.style.perspectiveOrigin = `50% ${AXIS}%`;
+  const mask = `linear-gradient(90deg,transparent,#000 ${FADE}%,#000 ${100 - FADE}%,transparent)`;
+  band.style.maskImage = mask;
+  band.style.webkitMaskImage = mask;
+  band.style.opacity = "1";
+
+  const share = ASPECT / SLICES;
+  const imgs = HERO_IMAGES;
+
+  for (let t = 0; t < columns; t++) {
+    const first = columns - 1 - t;
+    const tile = document.createElement("div");
+    tile.className = "tile";
+    tile.style.left = `calc(50% - ${u(ASPECT / 2)})`;
+    tile.style.top = `calc(${AXIS}% - ${u(0.5)})`;
+    tile.style.width = u(ASPECT);
+    tile.style.height = u(1);
+    tile.style.transformStyle = "preserve-3d";
+    tile.style.animation = `${orbit} ${duration}s linear ${-t * SPEED}s infinite`;
+
+    const start = imgs.length ? imgs[first % imgs.length] : null;
+    for (let k = 0; k < SLICES; k++) {
+      const s = document.createElement("div");
+      s.className = "strip" + (k === 0 ? " first" : "") + (k === SLICES - 1 ? " last" : "");
+      s.style.left = u((ASPECT - share) / 2);
+      s.style.width = k === SLICES - 1 ? u(share) : `calc(${u(share)} + 1px)`;
+      s.style.height = u(1);
+      s.style.transform = turn((ASPECT / 2 - (k + 0.5) * share) * unit);
+      const im = document.createElement("img");
+      im.draggable = false;
+      im.alt = "";
+      im.style.left = u(-k * share);
+      im.style.width = u(ASPECT);
+      im.style.height = u(1);
+      if (start) im.src = start.src;
+      s.appendChild(im);
+      tile.appendChild(s);
+    }
+
+    tile.addEventListener("animationiteration", e => {
+      if (!HERO_IMAGES.length) return;
+      const lap = Math.round(e.elapsedTime / duration);
+      const next = HERO_IMAGES[(lap * columns + first) % HERO_IMAGES.length];
+      tile.querySelectorAll("img").forEach(im => (im.src = next.src));
+    });
+
+    band.appendChild(tile);
+  }
+}
+
+/* Data (read only) */
+// URL ของ Google Apps Script Web App เดียวกับหน้าบันทึก
+const API_URL = "https://script.google.com/macros/s/AKfycbwFSjRsK5M3ReZFA0v8GrXTWSN1fm00VzKRHA71A1ZgdSsdejb8w-H4o1PKrilQaJ0P5w/exec";
+let works = [];
+
+async function loadWorks() {
+  const res = await fetch(API_URL);
+  const data = await res.json();
+  if (!data.ok) throw new Error(data.error || "โหลดไม่สำเร็จ");
+  works = data.works;
+}
+
+function refreshHero() {
+  const userImgs = works.flatMap(w => (w.images || []).map(src => ({ src })));
+  HERO_IMAGES = userImgs;
+  HERO_IMAGES.forEach(i => { new Image().src = i.src; });
+  document.getElementById("heroStat").textContent =
+    `ผลงานทั้งหมด ${works.length} ชิ้น`;
+  buildBand(true);
+}
+
+/* List */
+let filter = "all";
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function fmtDate(s) {
+  if (!s) return "";
+  return new Date(s + "T00:00:00").toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" });
+}
+
+function renderList() {
+  const chipData = [["all", "ทั้งหมด", works.length], ...CATS.map(c => [c, c, works.filter(w => w.cat === c).length])];
+  document.getElementById("chips").innerHTML = chipData.map(([key, label, n]) =>
+    `<button class="chip${filter === key ? " on" : ""}" data-f="${esc(key)}">${esc(label)}<span>${n}</span></button>`
+  ).join("");
+
+  const list = filter === "all" ? works : works.filter(w => w.cat === filter);
+  document.getElementById("listStat").textContent = `แสดง ${list.length} จาก ${works.length} ผลงาน`;
+
+  const grid = document.getElementById("grid");
+  if (!works.length) {
+    grid.innerHTML = `<div class="empty">ยังไม่มีผลงาน</div>`;
+    return;
+  }
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty">ไม่มีผลงานในหมวดนี้</div>`;
+    return;
+  }
+  grid.innerHTML = list.map(w => {
+    const imgs = w.images || [];
+    return `
+    <button class="work" data-id="${esc(w.id)}">
+      <div class="cover">
+        ${imgs.length
+          ? `<img src="${imgs[0]}" alt="${esc(w.title)}">${imgs.length > 1 ? `<span class="count">+${imgs.length - 1} รูป</span>` : ""}`
+          : `<div class="ph">ไม่มีรูป</div>`}
+      </div>
+      <div class="body">
+        <span class="badge">${esc(w.cat)}</span>
+        <h3>${esc(w.title)}</h3>
+        <span class="date">${fmtDate(w.date)}</span>
+        ${w.desc ? `<p class="desc">${esc(w.desc)}</p>` : ""}
+      </div>
+    </button>`;
+  }).join("");
+}
+
+document.getElementById("chips").addEventListener("click", e => {
+  const b = e.target.closest("[data-f]");
+  if (!b) return;
+  filter = b.dataset.f;
+  renderList();
+});
+
+/* Viewer */
+const viewer = document.getElementById("viewer");
+let current = null;
+
+function showImage(src) {
+  document.getElementById("vMain").src = src;
+  document.querySelectorAll("#vThumbs img").forEach(im =>
+    im.classList.toggle("on", im.dataset.src === src));
+}
+
+function openWork(w) {
+  current = w;
+  const imgs = w.images || [];
+  document.getElementById("vCat").textContent = w.cat;
+  document.getElementById("vTitle").textContent = w.title;
+  document.getElementById("vDate").textContent = fmtDate(w.date);
+  document.getElementById("vDesc").textContent = w.desc || "";
+  document.getElementById("vThumbs").innerHTML = imgs.map(src =>
+    `<img src="${src}" data-src="${src}" alt="">`).join("");
+  const main = document.getElementById("vMain");
+  main.style.display = imgs.length ? "" : "none";
+  if (imgs.length) showImage(imgs[0]);
+  viewer.classList.add("open");
+}
+
+function closeViewer() {
+  viewer.classList.remove("open");
+  document.getElementById("vMain").src = "";
+}
+
+document.getElementById("grid").addEventListener("click", e => {
+  const card = e.target.closest("[data-id]");
+  if (!card) return;
+  const w = works.find(x => x.id === card.dataset.id);
+  if (w) openWork(w);
+});
+
+document.getElementById("vThumbs").addEventListener("click", e => {
+  const im = e.target.closest("img[data-src]");
+  if (im) showImage(im.dataset.src);
+});
+
+document.getElementById("closeBtn").addEventListener("click", closeViewer);
+viewer.addEventListener("click", e => { if (e.target === viewer) closeViewer(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeViewer(); });
+
+/* Boot */
+const bandStyle = document.createElement("style");
+bandStyle.id = "band-style";
+document.head.appendChild(bandStyle);
+
+new ResizeObserver(() => buildBand(false)).observe(document.getElementById("hero"));
+loadWorks()
+  .then(() => { renderList(); refreshHero(); })
+  .catch(err => {
+    document.getElementById("heroStat").textContent = "โหลดข้อมูลไม่สำเร็จ";
+    document.getElementById("grid").innerHTML = `<div class="empty">โหลดข้อมูลไม่สำเร็จ: ${esc(err.message)}</div>`;
+  });
+</script>
+</body>
+</html>
